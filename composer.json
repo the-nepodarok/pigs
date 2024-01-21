@@ -1,5 +1,5 @@
 {
-    "name": "pigs",
+    "name": "rest_pigs/the_nepodarok",
     "description": "Yii 2 REST API для сайта «Домик для бедомных поросят»",
     "homepage": "https://www.yiiframework.com/",
     "type": "project",
