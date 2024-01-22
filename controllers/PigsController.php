@@ -3,13 +3,19 @@
 namespace app\controllers;
 
 use app\models\Pig;
-use yii\data\Pagination;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
 class PigsController extends ApiController
 {
     public $modelClass = 'app\models\Pig';
+
+    public function actionError(): array
+    {
+        \Yii::$app->response->setStatusCode(501);
+        return [];
+    }
 
     public function actionIndex(string $graduated = '')
     {
@@ -21,7 +27,7 @@ class PigsController extends ApiController
             $pigs = $pigs->where(['graduated' => false]);
         }
 
-        return $this->paginate($pigs);
+        return $this->paginate($pigs->orderBy('datetime DESC'), 15);
     }
 
     /**
@@ -98,5 +104,14 @@ class PigsController extends ApiController
         }
 
         throw new NotFoundHttpException('Объект не найден');
+    }
+
+    /**
+     * Свинок удалять нельзя!
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionDelete(int $id)
+    {
+        throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 }
