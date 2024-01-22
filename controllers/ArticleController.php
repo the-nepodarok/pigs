@@ -17,7 +17,7 @@ class ArticleController extends ApiController
             $articles = $articles->where("type_id = $type_id");
         }
 
-        return $this->paginate($articles);
+        return $this->paginate($articles->orderBy('datetime DESC'));
     }
 
     public function actionGet(int $id)

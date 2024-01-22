@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use yii\base\Model;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -10,15 +9,6 @@ use yii\db\ActiveRecord;
 class ApiController extends \yii\rest\Controller
 {
     public $layout = false;
-
-    public function actions(): array
-    {
-        return [
-            'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-        ];
-    }
 
     public static function allowedDomains(): array
     {
