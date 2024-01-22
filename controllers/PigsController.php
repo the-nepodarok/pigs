@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Pig;
+use http\Exception;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
@@ -72,7 +73,7 @@ class PigsController extends ApiController
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionUpdate(int $id)
+    public function actionUpdate(int $id): Pig|array
     {
         $pig = Pig::findOne($id);
 
@@ -98,5 +99,17 @@ class PigsController extends ApiController
         }
 
         throw new NotFoundHttpException('Объект не найден');
+    }
+
+    public function actionGraduate(int $id): Pig
+    {
+        $pig = Pig::findOne($id);
+
+        if ($pig) {
+            $pig->graduated = true;
+            $pig->save(false);
+        }
+
+        return $pig;
     }
 }

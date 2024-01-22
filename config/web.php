@@ -71,6 +71,7 @@ $config = [
                     'extraPatterns' => [
                         'GET <id:\d+>' => 'get',
                         'GET <graduated:\w+>' => 'index',
+                        'PATCH graduate/<id>' => 'graduate'
                     ],
                 ],
                 [
