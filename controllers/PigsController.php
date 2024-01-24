@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use app\models\Pig;
 use http\Exception;
-use yii\web\MethodNotAllowedHttpException;
+use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
@@ -118,7 +118,7 @@ class PigsController extends ApiController
 
         return $pig;
     }
-  
+
     /**
      * Свинок удалять нельзя!
      * @throws MethodNotAllowedHttpException
@@ -126,5 +126,16 @@ class PigsController extends ApiController
     public function actionDelete(int $id)
     {
         throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
+    }
+
+    public function actionRandomize(int $number, string $graduated = ''): Pig|array|null
+    {
+        $isGraduated = false;
+
+        if ($graduated === 'graduated') {
+            $isGraduated = true;
+        }
+
+        return Pig::find()->joinWith('photos', false,'INNER JOIN')->where(['IN','graduated', $isGraduated])->groupBy('pigs.id')->orderBy('RANDOM()')->limit($number)->all();
     }
 }
