@@ -138,5 +138,4 @@ class PigsController extends ApiController
 
         return Pig::find()->joinWith('photos', false,'INNER JOIN')->where(['IN','graduated', $isGraduated])->groupBy('pigs.id')->orderBy('RANDOM()')->limit($number)->all();
     }
-
 }
