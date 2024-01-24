@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Photo;
 use app\models\Pig;
 use http\Exception;
 use yii\data\Pagination;
@@ -112,4 +113,16 @@ class PigsController extends ApiController
 
         return $pig;
     }
+
+    public function actionRandomize(int $number, string $graduated = ''): Pig|array|null
+    {
+        $isGraduated = false;
+
+        if ($graduated === 'graduated') {
+            $isGraduated = true;
+        }
+
+        return Pig::find()->joinWith('photos', false,'INNER JOIN')->where(['IN','graduated', $isGraduated])->groupBy('pigs.id')->orderBy('RANDOM()')->limit($number)->all();
+    }
+
 }

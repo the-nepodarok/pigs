@@ -69,9 +69,11 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'pigs',
                     'extraPatterns' => [
+                        'GET random/<number:\d+>' => 'randomize',
+                        'GET random/<number:\d+>/<graduated:\w+>' => 'randomize',
                         'GET <id:\d+>' => 'get',
                         'GET <graduated:\w+>' => 'index',
-                        'PATCH graduate/<id>' => 'graduate'
+                        'PATCH graduate/<id>' => 'graduate',
                     ],
                 ],
                 [
