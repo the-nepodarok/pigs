@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\models\Photo;
 use app\models\Pig;
 use http\Exception;
 use yii\data\Pagination;
@@ -12,6 +11,12 @@ use yii\web\UploadedFile;
 class PigsController extends ApiController
 {
     public $modelClass = 'app\models\Pig';
+
+    public function actionError(): array
+    {
+        \Yii::$app->response->setStatusCode(501);
+        return [];
+    }
 
     public function actionIndex(string $graduated = '')
     {
@@ -23,7 +28,7 @@ class PigsController extends ApiController
             $pigs = $pigs->where(['graduated' => false]);
         }
 
-        return $this->paginate($pigs);
+        return $this->paginate($pigs->orderBy('datetime DESC'), 15);
     }
 
     /**
@@ -112,6 +117,15 @@ class PigsController extends ApiController
         }
 
         return $pig;
+    }
+
+    /**
+     * Свинок удалять нельзя!
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionDelete(int $id)
+    {
+        throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 
     public function actionRandomize(int $number, string $graduated = ''): Pig|array|null
