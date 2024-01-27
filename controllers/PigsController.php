@@ -22,6 +22,11 @@ class PigsController extends ApiController
     {
         $pigs = Pig::find();
 
+//        foreach ($pigs as $pig) {
+//            $time = strtotime($pig->datetime.' UTC');
+//            $pig->datetime = date("Y-m-d H:i:s", $time);
+//        }
+
         if ($graduated and $graduated === 'graduated') {
             $pigs = $pigs->where('graduated');
         } else {
@@ -88,12 +93,15 @@ class PigsController extends ApiController
 
             $pig->load($formData, '');
             $files = UploadedFile::getInstancesByName('files');
-            $pig->files = $files;
+
+            if (!empty($files) && $files[0]->size) {
+                $pig->files = $files;
+            }
 
             if ($formData and $pig->validate()) {
-                $pig->unlinkPhotos();
+                    $pig->unlinkPhotos();
 
-                if ($files) {
+                if (!empty($files) && $files[0]->size) {
                     $pig->linkPhotos($files);
                 }
 
