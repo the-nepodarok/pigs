@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\utils\DateDisplayBehavior;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -22,18 +23,6 @@ class Pig extends EntityWithPhotos
     public static function tableName(): string
     {
         return 'pigs';
-    }
-
-    public function init()
-    {
-        parent::init();
-
-        $this->on(ActiveRecord::EVENT_AFTER_FIND, function($event) {
-
-            $time = strtotime($this->datetime.' UTC');
-            $this->datetime = date("Y-m-d H:i:s", $time);
-
-        });
     }
 
     /**
