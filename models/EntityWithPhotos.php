@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\utils\DateDisplayBehavior;
 use yii\db\ActiveRecord;
 
 /**
@@ -12,6 +13,17 @@ class EntityWithPhotos extends ActiveRecord
 {
     public ?string $main_photo = null;
     public ?array $files = null;
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => DateDisplayBehavior::class,
+                'data' => $this
+            ]
+        ];
+
+    }
 
     public function rules(): array
     {
