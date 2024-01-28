@@ -5,8 +5,10 @@ namespace app\controllers;
 use app\models\Pig;
 use http\Exception;
 use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Json;
 
 class PigsController extends ApiController
 {
@@ -99,7 +101,22 @@ class PigsController extends ApiController
             }
 
             if ($formData and $pig->validate()) {
-                    $pig->unlinkPhotos();
+
+                // Получаем уже имеющиеся фотографии
+                $old_photos = $formData['old_photos'];
+
+                // Декодируем массив с именами фотографий
+                $old_photos = Json::decode($old_photos);
+
+                // Находим имеющиеся фотографии
+                $current_photos = $pig->photos;
+                $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+
+                // Сравниваем пришедшие имена фотографий с теми, что уже имеются
+                $difference = array_diff($current_photos, $old_photos);
+
+                // Удаляем лишние фотографии
+                $pig->unlinkPhotos($difference);
 
                 if (!empty($files) && $files[0]->size) {
                     $pig->linkPhotos($files);
@@ -109,8 +126,9 @@ class PigsController extends ApiController
                 $pig->refresh();
                 return $pig;
             }
-                return $this->validationFailed($pig);
-        }
+
+            return $this->validationFailed($pig);
+       }
 
         throw new NotFoundHttpException('Объект не найден');
     }

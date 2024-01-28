@@ -14,16 +14,16 @@ class EntityWithPhotos extends ActiveRecord
     public ?string $main_photo = null;
     public ?array $files = null;
 
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => DateDisplayBehavior::class,
-                'data' => $this
-            ]
-        ];
-
-    }
+//    public function behaviors()
+//    {
+//        return [
+//            [
+//                'class' => DateDisplayBehavior::class,
+//                'data' => $this
+//            ]
+//        ];
+//
+//    }
 
     public function rules(): array
     {
@@ -81,10 +81,11 @@ class EntityWithPhotos extends ActiveRecord
      * Открепление фотографий от модели и удаление из файловой системы
      * @return void
      */
-    public function unlinkPhotos(): void
+    public function unlinkPhotos(array $photos): void
     {
-        foreach ($this->photos as $photo) {
-            $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo->image . '.jpg';
+        foreach ($photos as $photo) {
+            $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
+            $photo = Photo::find()->where(['image' => $photo])->one();
             $photo->unlink('pig', $this);
             $photo->delete();
             unlink($filename);
