@@ -63,6 +63,7 @@ $config = [
                         'GET type/<type_id:[1-2]>' => 'index',
                         'GET <id>' => 'get',
                         'POST type/<type_id:\d+>' => 'create',
+                        'PATCH <id>' => 'update',
                         'DELETE <id>' => 'delete'
                     ],
                 ],
