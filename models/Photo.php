@@ -2,8 +2,10 @@
 
 namespace app\models;
 
+use finfo;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 
 /**
@@ -21,12 +23,39 @@ use yii\web\UploadedFile;
  */
 class Photo extends \yii\db\ActiveRecord
 {
+
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return 'photos';
+    }
+
+    /**
+     * Загрузка картинки по веб-адресу или из base64
+     * @throws \Exception
+     */
+    public static function uploadFromBase64(string $src): Photo
+    {
+        $b64 = explode('base64,', $src)[1];
+        $imageData = base64_decode($b64);
+        $mime = getimagesizefromstring($imageData)['mime'];
+
+        if (!str_starts_with($mime, 'image')) {
+            throw new \Exception('Неверный формат файла');
+        }
+
+        $extension = FileHelper::getExtensionByMimeType($mime);
+        $filename = uniqid('domik-article-') . ".$extension";
+        $fullpath = Yii::getAlias('@webroot') . "/img/$filename";
+        file_put_contents($fullpath, $imageData);
+
+        $photo = new self();
+        $photo->image = $filename;
+        $photo->save();
+
+        return $photo;
     }
 
     /**
@@ -68,8 +97,9 @@ class Photo extends \yii\db\ActiveRecord
     public function upload(UploadedFile $file): void
     {
         $name = uniqid('domik-');
-        if ($file->saveAs('@webroot/img' . DIRECTORY_SEPARATOR . $name . '.jpg')) {
-            $this->image = $name;
+        $extension = ".$file->extension";
+        if ($file->saveAs('@webroot/img' . DIRECTORY_SEPARATOR . $name . $extension)) {
+            $this->image = $name . $extension;
         } else {
             throw new \Exception('Не удалось записать файл');
         }
