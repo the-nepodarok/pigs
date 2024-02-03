@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Photo;
 use app\models\TurnIn;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
@@ -45,7 +46,17 @@ class TurnInController extends ApiController
             $newEntry->save(false);
 
             if ($files) {
-                $newEntry->linkPhotos($files);
+                foreach ($files as $file) {
+                    $photo = new Photo();
+
+                    try {
+                        $photo->upload($file);
+                    } catch (\Exception $exception) {
+                        error_log($exception->getMessage());
+                    }
+
+                    $newEntry->linkPhoto($photo);
+                }
             }
 
             return $newEntry;

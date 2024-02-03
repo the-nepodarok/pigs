@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Article;
+use app\models\Photo;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
@@ -46,16 +47,35 @@ class ArticleController extends ApiController
 
         $newArticle = new Article();
         $newArticle->load($formData, '');
-        $files = UploadedFile::getInstancesByName('files');
-
         $newArticle->type_id = $type_id;
-        $newArticle->files = $files;
 
-        if ($newArticle->validate()) {
+        $files = UploadedFile::getInstancesByName('files');
+        $photos = [];
+
+        // если создаётся статья из полнотекстового редактора
+        if ($type_id === 1) {
+            $photos = $newArticle->handleImageMarkup($photos);
+        }
+
+        if (empty($newArticle->errors) and $newArticle->validate()) {
             $newArticle->save(false);
 
             if ($files) {
-                $newArticle->linkPhotos($files);
+                $newArticle->files = $files;
+                foreach ($files as $file) {
+                    $photo = new Photo();
+
+                    try {
+                        $photo->upload($file);
+                        $photos[] = $photo;
+                    } catch (\Exception $exception) {
+                        $newArticle->addError('files', $exception->getMessage());
+                    }
+                }
+            }
+
+            foreach ($photos as $photo) {
+                $newArticle->linkPhoto($photo);
             }
 
             return $newArticle;
@@ -82,7 +102,17 @@ class ArticleController extends ApiController
                 $article->unlinkPhotos();
 
                 if ($files) {
-                    $article->linkPhotos($files);
+                    foreach ($files as $file) {
+                        $photo = new Photo();
+
+                        try {
+                            $photo->upload($file);
+                        } catch (\Exception $exception) {
+                            error_log($exception->getMessage());
+                        }
+
+                        $article->linkPhoto($photo);
+                    }
                 }
 
                 $article->save(false);

@@ -2,9 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\Photo;
 use app\models\Pig;
-use http\Exception;
-use yii\data\Pagination;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
@@ -66,7 +66,17 @@ class PigsController extends ApiController
             $newPig->save(false);
 
             if ($files) {
-                $newPig->linkPhotos($files);
+                foreach ($files as $file) {
+                    $photo = new Photo();
+
+                    try {
+                        $photo->upload($file);
+                    } catch (\Exception $exception) {
+                        error_log($exception->getMessage());
+                    }
+
+                    $newPig->linkPhoto($photo);
+                }
             }
 
             return $newPig;
@@ -94,7 +104,17 @@ class PigsController extends ApiController
                 $pig->unlinkPhotos();
 
                 if ($files) {
-                    $pig->linkPhotos($files);
+                    foreach ($files as $file) {
+                        $photo = new Photo();
+
+                        try {
+                            $photo->upload($file);
+                        } catch (\Exception $exception) {
+                            error_log($exception->getMessage());
+                        }
+
+                        $pig->linkPhoto($photo);
+                    }
                 }
 
                 $pig->save(false);
