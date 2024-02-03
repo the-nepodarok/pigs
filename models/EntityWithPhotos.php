@@ -12,6 +12,18 @@ class EntityWithPhotos extends ActiveRecord
 {
     public ?string $main_photo = null;
     public ?array $files = null;
+    public string $className;
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+
+        // Получение названия класса
+        $this->className = lcfirst(
+            basename(
+                get_class($this)
+            ));
+    }
 
     public function rules(): array
     {
@@ -42,27 +54,10 @@ class EntityWithPhotos extends ActiveRecord
      * Загрузка фотографий в файловую систему и прикрепление к модели
      * @param array $files
      * @return void
-     * @throws \Exception
      */
-    public function linkPhotos(array $files): void
+    public function linkPhoto(Photo $photo): void
     {
-        // Получение названия класса
-        $className = lcfirst(
-            basename(
-                get_class($this)
-            ));
-
-        foreach ($files as $file) {
-            $photo = new Photo();
-
-            try {
-                $photo->upload($file);
-            } catch (\Exception $exception) {
-                error_log($exception->getMessage());
-            }
-
-            $photo->link($className, $this);
-        }
+        $photo->link($this->className, $this);
     }
 
     /**
@@ -72,8 +67,8 @@ class EntityWithPhotos extends ActiveRecord
     public function unlinkPhotos(): void
     {
         foreach ($this->photos as $photo) {
-            $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo->image . '.jpg';
-            $photo->unlink('pig', $this);
+            $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo->image;
+            $photo->unlink($this->className, $this);
             $photo->delete();
             unlink($filename);
         }
