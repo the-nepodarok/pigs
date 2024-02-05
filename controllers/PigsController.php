@@ -108,12 +108,8 @@ class PigsController extends ApiController
                 // Декодируем массив с именами фотографий
                 $old_photos = Json::decode($old_photos);
 
-                // Находим имеющиеся фотографии
-                $current_photos = $pig->photos;
-                $current_photos = ArrayHelper::getColumn($current_photos, 'image');
-
-                // Сравниваем пришедшие имена фотографий с теми, что уже имеются
-                $difference = array_diff($current_photos, $old_photos);
+                // Сравниваем фотографии с загруженными ранее
+                $difference = $pig->comparePhotos($old_photos);
 
                 // Удаляем лишние фотографии
                 $pig->unlinkPhotos($difference);

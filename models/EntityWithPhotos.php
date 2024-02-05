@@ -2,8 +2,8 @@
 
 namespace app\models;
 
-use app\utils\DateDisplayBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * @property string|null $main_photo;
@@ -14,16 +14,15 @@ class EntityWithPhotos extends ActiveRecord
     public ?string $main_photo = null;
     public ?array $files = null;
 
-//    public function behaviors()
-//    {
-//        return [
-//            [
-//                'class' => DateDisplayBehavior::class,
-//                'data' => $this
-//            ]
-//        ];
-//
-//    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        // Устанавливает отображение даты по заданному часовому поясу
+        $time = strtotime($this->datetime.' UTC');
+        $this->datetime = date("Y-m-d H:i:s", $time);
+    }
 
     public function rules(): array
     {
@@ -90,5 +89,21 @@ class EntityWithPhotos extends ActiveRecord
             $photo->delete();
             unlink($filename);
         }
+    }
+
+    /**
+     * Сравнивает массив пришедших фотографий с теми, что уже были загружены и возвращает различие
+     * @param array $old_photos
+     * @return array
+     */
+    public function comparePhotos (array $old_photos): array
+    {
+        // Находим имеющиеся фотографии
+        $current_photos = $this->photos;
+        $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+
+        // Сравниваем пришедшие имена фотографий с теми, что уже имеются
+        return array_diff($current_photos, $old_photos);
+
     }
 }

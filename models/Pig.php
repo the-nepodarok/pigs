@@ -2,10 +2,8 @@
 
 namespace app\models;
 
-use app\utils\DateDisplayBehavior;
 use Yii;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "pigs".
