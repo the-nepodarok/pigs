@@ -26,10 +26,11 @@ class AuthController extends ApiController
                 $user->save();
 
                 return $user->toArray();
-            } else {
-                $errors = $user->errors;
             }
+
+            $errors = $user->errors;
         }
+
 
         return $this->validationFailed($auth);
     }
