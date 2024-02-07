@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * @property string|null $main_photo;
@@ -12,6 +13,16 @@ class EntityWithPhotos extends ActiveRecord
 {
     public ?string $main_photo = null;
     public ?array $files = null;
+
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        // Устанавливает отображение даты по заданному часовому поясу
+        $time = strtotime($this->datetime.' UTC');
+        $this->datetime = date("Y-m-d H:i:s", $time);
+    }
 
     public function rules(): array
     {
@@ -69,13 +80,27 @@ class EntityWithPhotos extends ActiveRecord
      * Открепление фотографий от модели и удаление из файловой системы
      * @return void
      */
-    public function unlinkPhotos(): void
+    public function unlinkPhoto (string $photo): void
     {
-        foreach ($this->photos as $photo) {
-            $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo->image . '.jpg';
-            $photo->unlink('pig', $this);
-            $photo->delete();
-            unlink($filename);
-        }
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
+        $photo = Photo::find()->where(['image' => $photo])->one();
+        $photo->unlink('pig', $this);
+        $photo->delete();
+        unlink($filename);
+    }
+
+    /**
+     * Сравнивает массив пришедших фотографий с теми, что уже были загружены, и возвращает различие
+     * @param array $old_photos
+     * @return array
+     */
+    public function comparePhotos (array $old_photos): array
+    {
+        // Находим имеющиеся фотографии
+        $current_photos = $this->photos;
+        $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+
+        // Сравниваем пришедшие имена фотографий с теми, что уже имеются
+        return array_diff($current_photos, $old_photos);
     }
 }
