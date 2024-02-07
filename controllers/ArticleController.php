@@ -95,7 +95,9 @@ class ArticleController extends ApiController
                 $difference = $article->comparePhotos($old_photos);
 
                 // Удаляем лишние фотографии
-                $article->unlinkPhotos($difference);
+                foreach ($difference as $photo) {
+                    $article->unlinkPhotos($photo);
+                }
 
                 if (!empty($files) && $files[0]->size) {
                     $article->linkPhotos($files);
@@ -121,7 +123,14 @@ class ArticleController extends ApiController
         $article = Article::findOne($id);
 
         if ($article) {
-            $article->unlinkPhotos();
+            // Находим имеющиеся фотографии
+            $article_photos = $this->photos;
+            $article_photos = ArrayHelper::getColumn($article_photos, 'image');
+
+            foreach ($article_photos as $photo) {
+                $article->unlinkPhoto($photo);
+            }
+
             $article->delete();
 
             \Yii::$app->response->statusCode = 204;

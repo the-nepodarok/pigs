@@ -112,7 +112,9 @@ class PigsController extends ApiController
                 $difference = $pig->comparePhotos($old_photos);
 
                 // Удаляем лишние фотографии
-                $pig->unlinkPhotos($difference);
+                foreach ($difference as $photo) {
+                    $pig->unlinkPhoto($photo);
+                }
 
                 if (!empty($files) && $files[0]->size) {
                     $pig->linkPhotos($files);
