@@ -3,6 +3,8 @@
 namespace app\controllers;
 
 use app\models\Article;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use app\models\Photo;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -96,23 +98,29 @@ class ArticleController extends ApiController
 
             $article->load($formData, '');
             $files = UploadedFile::getInstancesByName('files');
-            $article->files = $files;
+
+            if (!empty($files) && $files[0]->size) {
+                $article->files = $files;
+            }
 
             if ($formData and $article->validate()) {
-                $article->unlinkPhotos();
 
-                if ($files) {
-                    foreach ($files as $file) {
-                        $photo = new Photo();
+                // Получаем уже имеющиеся фотографии
+                $old_photos = $formData['old_photos'];
 
-                        try {
-                            $photo->upload($file);
-                        } catch (\Exception $exception) {
-                            error_log($exception->getMessage());
-                        }
+                // Декодируем массив с именами фотографий
+                $old_photos = Json::decode($old_photos);
 
-                        $article->linkPhoto($photo);
-                    }
+                // Сравниваем фотографии с загруженными ранее
+                $difference = $article->comparePhotos($old_photos);
+
+                // Удаляем лишние фотографии
+                foreach ($difference as $photo) {
+                    $article->unlinkPhotos($photo);
+                }
+
+                if (!empty($files) && $files[0]->size) {
+                    $article->linkPhotos($files);
                 }
 
                 $article->save(false);
@@ -135,7 +143,14 @@ class ArticleController extends ApiController
         $article = Article::findOne($id);
 
         if ($article) {
-            $article->unlinkPhotos();
+            // Находим имеющиеся фотографии
+            $article_photos = $this->photos;
+            $article_photos = ArrayHelper::getColumn($article_photos, 'image');
+
+            foreach ($article_photos as $photo) {
+                $article->unlinkPhoto($photo);
+            }
+
             $article->delete();
 
             \Yii::$app->response->statusCode = 204;

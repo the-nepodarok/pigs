@@ -5,8 +5,12 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use yii\web\MethodNotAllowedHttpException;
+use http\Exception;
+use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Json;
 
 class PigsController extends ApiController
 {
@@ -98,31 +102,38 @@ class PigsController extends ApiController
 
             $pig->load($formData, '');
             $files = UploadedFile::getInstancesByName('files');
-            $pig->files = $files;
+
+            if (!empty($files) && $files[0]->size) {
+                $pig->files = $files;
+            }
 
             if ($formData and $pig->validate()) {
-                $pig->unlinkPhotos();
 
-                if ($files) {
-                    foreach ($files as $file) {
-                        $photo = new Photo();
+                // Получаем уже имеющиеся фотографии
+                $old_photos = $formData['old_photos'];
 
-                        try {
-                            $photo->upload($file);
-                        } catch (\Exception $exception) {
-                            error_log($exception->getMessage());
-                        }
+                // Декодируем массив с именами фотографий
+                $old_photos = Json::decode($old_photos);
 
-                        $pig->linkPhoto($photo);
-                    }
+                // Сравниваем фотографии с загруженными ранее
+                $difference = $pig->comparePhotos($old_photos);
+
+                // Удаляем лишние фотографии
+                foreach ($difference as $photo) {
+                    $pig->unlinkPhoto($photo);
+                }
+
+                if (!empty($files) && $files[0]->size) {
+                    $pig->linkPhotos($files);
                 }
 
                 $pig->save(false);
                 $pig->refresh();
                 return $pig;
             }
-                return $this->validationFailed($pig);
-        }
+
+            return $this->validationFailed($pig);
+       }
 
         throw new NotFoundHttpException('Объект не найден');
     }
