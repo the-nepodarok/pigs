@@ -82,7 +82,7 @@ class EntityWithPhotos extends ActiveRecord
      */
     public function unlinkPhoto (string $photo): void
     {
-        $filename = \Yii::getAlias('@webroot') . '/img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
         $photo = Photo::find()->where(['image' => $photo])->one();
         $photo->unlink('pig', $this);
         $photo->delete();
