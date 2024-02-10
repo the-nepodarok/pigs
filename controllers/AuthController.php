@@ -18,7 +18,7 @@ class AuthController extends ApiController
 
 
         if ($auth->validate()) {
-            $user = Admin::find()->where('name = "' . $post['name'] . '"')->one();
+            $user = Admin::find()->where(['name' => $post['name']])->one();
 
             if ($user->validatePassword($post['password'])) {
                 $token = \Yii::$app->security->generateRandomString();
@@ -27,12 +27,9 @@ class AuthController extends ApiController
 
                 return $user->toArray();
             }
-
-            $errors = $user->errors;
         }
 
-
-        return $this->validationFailed($auth);
+        return $this->validationFailed($user ?? $auth);
     }
 
     public function actionLogout()
@@ -41,5 +38,7 @@ class AuthController extends ApiController
         $admin = Admin::findIdentityByAccessToken($token);
         $admin->token = null;
         $admin->save();
+
+        \Yii::$app->response->statusCode = 205;
     }
 }
