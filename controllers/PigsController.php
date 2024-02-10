@@ -5,9 +5,6 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use yii\web\MethodNotAllowedHttpException;
-use http\Exception;
-use yii\data\Pagination;
-use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\helpers\Json;
@@ -167,6 +164,12 @@ class PigsController extends ApiController
             $isGraduated = true;
         }
 
-        return Pig::find()->joinWith('photos', false,'INNER JOIN')->where(['IN','graduated', $isGraduated])->groupBy('pigs.id')->orderBy('RANDOM()')->limit($number)->all();
+        $pigs = Pig::find()
+            ->joinWith('photos', false,'INNER JOIN')
+            ->where(['IN','graduated', $isGraduated])
+            ->groupBy('pigs.id')
+            ->orderBy('RANDOM()')->limit($number);
+
+        return ['payload' => $pigs->all(), 'count' => $pigs->count()];
     }
 }
