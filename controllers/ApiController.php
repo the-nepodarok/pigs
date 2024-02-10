@@ -36,16 +36,16 @@ class ApiController extends \yii\rest\Controller
                 'Origin' => static::allowedDomains(),
                 'Access-Control-Request-Method' => static::allowedMethods(),
                 'Access-Control-Allow-Credentials' => true,
-                'Access-Control-Allow-Headers' => ['Origin', 'Content-Type', 'Accept'],
+                'Access-Control-Allow-Headers' => ['Origin', 'Content-Type', 'Accept', 'Authorization'],
                 'Access-Control-Max-Age' => 86400,
                 'Access-Control-Expose-Headers' => [],
             ]
         ];
 
-//        $bh['authenticator'] = [
-//            'class' => \yii\filters\auth\HttpBearerAuth::class,
-//            'except' => ['get', 'index', 'login']
-//        ];
+        $bh['authenticator'] = [
+            'class' => \yii\filters\auth\HttpBearerAuth::class,
+            'except' => ['get', 'index', 'login', 'randomize']
+        ];
 
         return $bh;
     }
@@ -81,7 +81,8 @@ class ApiController extends \yii\rest\Controller
             ->all();
 
         return [
-            'payload' => $payload, 'pagination' => [
+            'payload' => $payload,
+            'pagination' => [
                 'page' => $pagination->page,
                 'pageCount' => $pagination->pageCount
             ]
