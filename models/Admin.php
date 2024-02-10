@@ -35,7 +35,7 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules(): array
     {
         return [
-            [['name', 'password'], 'required', 'message' => 'Поле «{attribute}» обязательно к заполнению'],
+            [['name', 'password'], 'required', 'message' => '«{attribute}» обязательно к заполнению'],
             [['name', 'password'], 'string', 'message' => 'Поле «{attribute}» должно быть строкой'],
             ['name', 'exist', 'message' => 'Пользователя с таким именем не существует'],
             [['name', 'id', 'token', 'password'], 'safe'],
@@ -58,9 +58,9 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
-            'password' => 'Password',
-            'token' => 'Auth Token'
+            'name' => 'Имя пользователя',
+            'password' => 'Секретное слово',
+            'token' => 'Секретный ключ'
         ];
     }
 
