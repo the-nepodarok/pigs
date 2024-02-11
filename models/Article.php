@@ -116,6 +116,9 @@ class Article extends EntityWithPhotos
                     } catch (\Exception $e) {
                         $this->addError('files', $e->getMessage());
                     }
+                } elseif (str_contains($src, 'domik-article-')) {
+                    $src = strstr($src, 'domik-article');
+                    $photo = Photo::find($src);
                 }
 
                 // подмена адреса картинки в тегах на серверный
