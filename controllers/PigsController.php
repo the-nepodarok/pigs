@@ -122,7 +122,15 @@ class PigsController extends ApiController
                 }
 
                 if (!empty($files) && $files[0]->size) {
-                    $pig->linkPhoto($files);
+                    foreach ($files as $file) {
+                        $photo = new Photo();
+                        try {
+                            $photo->upload($file);
+                            $pig->linkPhoto($photo);
+                        } catch (\Exception $e) {
+                            $pig->addError('files', $e->getMessage());
+                        }
+                    }
                 }
 
                 $pig->save(false);
