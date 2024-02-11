@@ -117,11 +117,12 @@ class PigsController extends ApiController
 
                 // Удаляем лишние фотографии
                 foreach ($difference as $photo) {
+                    $photo = Photo::find()->where(['image' => $photo])->one();
                     $pig->unlinkPhoto($photo);
                 }
 
                 if (!empty($files) && $files[0]->size) {
-                    $pig->linkPhotos($files);
+                    $pig->linkPhoto($files);
                 }
 
                 $pig->save(false);

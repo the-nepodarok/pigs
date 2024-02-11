@@ -116,11 +116,12 @@ class ArticleController extends ApiController
 
                 // Удаляем лишние фотографии
                 foreach ($difference as $photo) {
+                    $photo = Photo::find()->where(['image' => $photo])->one();
                     $article->unlinkPhotos($photo);
                 }
 
                 if (!empty($files) && $files[0]->size) {
-                    $article->linkPhotos($files);
+                    $article->linkPhoto($files);
                 }
 
                 $article->save(false);
