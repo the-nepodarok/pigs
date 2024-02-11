@@ -63,7 +63,7 @@ class EntityWithPhotos extends ActiveRecord
 
     /**
      * Загрузка фотографий в файловую систему и прикрепление к модели
-     * @param array $files
+     * @param $photo Photo
      * @return void
      */
     public function linkPhoto(Photo $photo): void
@@ -73,6 +73,7 @@ class EntityWithPhotos extends ActiveRecord
 
     /**
      * Открепление фотографии от модели и удаление из файловой системы
+     * @param $photo Photo
      */
     public function unlinkPhoto (Photo $photo): void
     {
