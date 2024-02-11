@@ -63,7 +63,7 @@ class EntityWithPhotos extends ActiveRecord
 
     /**
      * Загрузка фотографий в файловую систему и прикрепление к модели
-     * @param array $files
+     * @param $photo Photo
      * @return void
      */
     public function linkPhoto(Photo $photo): void
@@ -73,12 +73,12 @@ class EntityWithPhotos extends ActiveRecord
 
     /**
      * Открепление фотографий от модели и удаление из файловой системы
+     * @param $photo Photo
      * @return void
      */
-    public function unlinkPhoto (string $photo): void
+    public function unlinkPhoto (Photo $photo): void
     {
-        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
-        $photo = Photo::find()->where(['image' => $photo])->one();
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo->image . '.jpg';
         $photo->unlink($this->className, $this);
         $photo->delete();
         unlink($filename);
