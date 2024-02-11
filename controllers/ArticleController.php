@@ -109,10 +109,7 @@ class ArticleController extends ApiController
                 // если редактируется статья из полнотекстового редактора
                 if ($article->type_id === 1) {
                     $photos = $article->handleImageMarkup($photos);
-
-                    if ($photos) {
-                        $article->unlinkAllPhotos();
-                    }
+                    $difference = $article->comparePhotos(array_column($photos, 'image'));
 
                 } else {
                     // Получаем уже имеющиеся фотографии
@@ -120,29 +117,31 @@ class ArticleController extends ApiController
 
                     // Сравниваем фотографии с загруженными ранее
                     $difference = $article->comparePhotos($old_photos);
+                }
 
-                    // Удаляем лишние фотографии
-                    foreach ($difference as $photo) {
-                        try {
-                            $article->unlinkPhoto(Photo::find()->where(['image' => $photo])->one());
-                        } catch (\Exception $e) {
-                            error_log($e->getMessage());
-                        }
+                // Удаляем лишние фотографии
+                foreach ($difference as $photo) {
+                    try {
+                        $article->unlinkPhoto(Photo::find()->where(['image' => $photo])->one());
+                    } catch (\Exception $e) {
+                        error_log($e->getMessage());
                     }
+                }
 
-                    if (!empty($files) && $files[0]->size) {
-                        foreach ($files as $file) {
-                            $photo = new Photo();
-                            try {
-                                $photo->upload($file);
-                                $photos[] = $photo;
-                            } catch (\Exception $e) {
-                                $article->addError('files', $e->getMessage());
-                            }
+                // Загружаем новые из формы
+                if (!empty($files) && $files[0]->size) {
+                    foreach ($files as $file) {
+                        $photo = new Photo();
+                        try {
+                            $photo->upload($file);
+                            $photos[] = $photo;
+                        } catch (\Exception $e) {
+                            $article->addError('files', $e->getMessage());
                         }
                     }
                 }
 
+                // Прикрепление фотографий
                 foreach ($photos as $photo) {
                     $article->linkPhoto($photo);
                 }

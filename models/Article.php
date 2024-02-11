@@ -111,14 +111,17 @@ class Article extends EntityWithPhotos
                 if (str_starts_with($src, 'data:image') and str_contains($src, 'base64')) {
                     try {
                         $photo = Photo::uploadFromBase64($src);
-                        $photos[] = $photo;
                         $src = $photo->image;
                     } catch (\Exception $e) {
                         $this->addError('files', $e->getMessage());
                     }
                 } elseif (str_contains($src, 'domik-article-')) {
                     $src = strstr($src, 'domik-article');
-                    $photo = Photo::find($src);
+                    $photo = Photo::find()->where(['image' => $src])->one();
+                }
+
+                if (isset($photo)) {
+                    $photos[] = $photo;
                 }
 
                 // подмена адреса картинки в тегах на серверный
