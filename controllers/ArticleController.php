@@ -104,23 +104,47 @@ class ArticleController extends ApiController
             }
 
             if ($formData and $article->validate()) {
+                $photos = [];
 
-                // Получаем уже имеющиеся фотографии
-                $old_photos = $formData['old_photos'];
+                // если редактируется статья из полнотекстового редактора
+                if ($article->type_id === 1) {
+                    $photos = $article->handleImageMarkup($photos);
 
-                // Декодируем массив с именами фотографий
-                $old_photos = Json::decode($old_photos);
+                    if ($photos) {
+                        $article->unlinkAllPhotos();
+                    }
 
-                // Сравниваем фотографии с загруженными ранее
-                $difference = $article->comparePhotos($old_photos);
+                } else {
+                    // Получаем уже имеющиеся фотографии
+                    $old_photos = Json::decode($formData['old_photos']);
 
-                // Удаляем лишние фотографии
-                foreach ($difference as $photo) {
-                    $article->unlinkPhotos($photo);
+                    // Сравниваем фотографии с загруженными ранее
+                    $difference = $article->comparePhotos($old_photos);
+
+                    // Удаляем лишние фотографии
+                    foreach ($difference as $photo) {
+                        try {
+                            $article->unlinkPhoto(Photo::find()->where(['image' => $photo])->one());
+                        } catch (\Exception $e) {
+                            error_log($e->getMessage());
+                        }
+                    }
+
+                    if (!empty($files) && $files[0]->size) {
+                        foreach ($files as $file) {
+                            $photo = new Photo();
+                            try {
+                                $photo->upload($file);
+                                $photos[] = $photo;
+                            } catch (\Exception $e) {
+                                $article->addError('files', $e->getMessage());
+                            }
+                        }
+                    }
                 }
 
-                if (!empty($files) && $files[0]->size) {
-                    $article->linkPhotos($files);
+                foreach ($photos as $photo) {
+                    $article->linkPhoto($photo);
                 }
 
                 $article->save(false);
@@ -144,7 +168,7 @@ class ArticleController extends ApiController
 
         if ($article) {
             // Находим имеющиеся фотографии
-            $article_photos = $this->photos;
+            $article_photos = $article->photos;
             $article_photos = ArrayHelper::getColumn($article_photos, 'image');
 
             foreach ($article_photos as $photo) {
