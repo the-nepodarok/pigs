@@ -72,16 +72,30 @@ class EntityWithPhotos extends ActiveRecord
     }
 
     /**
-     * Открепление фотографий от модели и удаление из файловой системы
-     * @return void
+     * Открепление фотографии от модели и удаление из файловой системы
      */
-    public function unlinkPhoto (string $photo): void
+    public function unlinkPhoto (Photo $photo): void
     {
-        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo . '.jpg';
-        $photo = Photo::find()->where(['image' => $photo])->one();
-        $photo->unlink($this->className, $this);
-        $photo->delete();
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo->image;
+
+        try {
+            $photo->unlink($this->className, $this);
+        } catch (\Exception $e) {
+            error_log('Attempt to unlink file that does not exist');
+        }
+
+        try {
+            $photo->delete();
+        } catch (\Throwable $e) {
+            error_log('Failed to delete record');
+        }
+
         unlink($filename);
+    }
+
+    public function unlinkAllPhotos(): void
+    {
+        array_walk($this->photos, [$this, 'unlinkPhoto']);
     }
 
     /**
