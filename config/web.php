@@ -81,9 +81,10 @@ $config = [
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['requests' => 'turn-in'],
-                    'except' => ['view'],
-                    'extraPatterns' => [
-                        'GET <id>' => 'get'
+                    'patterns' => [
+                        'GET <id>' => 'get',
+                        'POST turnin' => 'create',
+                        'DELETE <id>' => 'delete'
                     ],
                 ],
                 [
