@@ -44,10 +44,15 @@ class ApiController extends \yii\rest\Controller
 
         $bh['authenticator'] = [
             'class' => \yii\filters\auth\HttpBearerAuth::class,
-            'except' => ['get', 'index', 'login', 'randomize']
+            'except' => $this->allowedActions()
         ];
 
         return $bh;
+    }
+
+    protected function allowedActions(): array
+    {
+        return ['get', 'index', 'login', 'randomize'];
     }
 
     /**
