@@ -14,6 +14,11 @@ class TurnInController extends ApiController
         return ['GET', 'POST', 'DELETE'];
     }
 
+    public function allowedActions(): array
+    {
+        return ['create'];
+    }
+
     public function actionIndex(): array
     {
         return TurnIn::find()->all();
