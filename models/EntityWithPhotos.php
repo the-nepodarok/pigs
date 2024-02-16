@@ -27,7 +27,7 @@ class EntityWithPhotos extends ActiveRecord
     }
 
 
-    public function afterFind()
+    public function afterFind(): void
     {
         parent::afterFind();
 

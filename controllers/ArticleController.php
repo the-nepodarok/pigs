@@ -12,7 +12,7 @@ use yii\web\UploadedFile;
 
 class ArticleController extends ApiController
 {
-    public function actionIndex(?int $type_id = null)
+    public function actionIndex(?int $type_id = null): array
     {
         $articles = Article::find();
 
@@ -52,6 +52,7 @@ class ArticleController extends ApiController
         $newArticle->type_id = $type_id;
 
         $files = UploadedFile::getInstancesByName('files');
+        $newArticle->files = $files;
         $photos = [];
 
         // если создаётся статья из полнотекстового редактора
