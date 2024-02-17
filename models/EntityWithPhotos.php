@@ -41,10 +41,12 @@ class EntityWithPhotos extends ActiveRecord
         return [
             [['files'], 'image',
                 'maxFiles' => 0,
+                'maxSize' => 3e+6,
                 'skipOnEmpty' => true,
-                'extensions' => 'jpg, jpeg',
+                'extensions' => ['jpg', 'jpeg'],
                 'wrongExtension' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
                 'wrongMimeType' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
+                'tooBig' => 'Файл слишком большой. Максимально допустимый размер: 3MB'
             ],
         ];
     }
