@@ -174,6 +174,7 @@ class PigsController extends ApiController
         }
 
         $pigs = Pig::find()
+            ->select('pigs.id, name, image')
             ->joinWith('photos', false,'INNER JOIN')
             ->where(['IN','graduated', $isGraduated])
             ->groupBy('pigs.id')
