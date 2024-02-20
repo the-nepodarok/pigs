@@ -11,7 +11,7 @@ use yii\helpers\Json;
 
 class PigsController extends ApiController
 {
-    public $modelClass = 'app\models\Pig';
+    public string $modelClass = Pig::class;
 
     public function actionError(): array
     {
@@ -19,7 +19,7 @@ class PigsController extends ApiController
         return [];
     }
 
-    public function actionIndex(string $graduated = '')
+    public function actionIndex(string $graduated = ''): array
     {
         $pigs = Pig::find();
 
@@ -30,60 +30,6 @@ class PigsController extends ApiController
         }
 
         return $this->paginate($pigs->orderBy('datetime DESC'), 15);
-    }
-
-    /**
-     * @param int $id ID свиника
-     * @throws NotFoundHttpException Ошибка 404 при неверном ID
-     */
-    public function actionGet(int $id): Pig|array|null
-    {
-        $pig = Pig::findOne($id);
-
-        if ($pig) {
-//            if ($pig->getPhotos()) {
-//                $photos = $pig->getPhotos()->select('image')->asArray()->all();
-//                $photos = ArrayHelper::getColumn($photos, 'image');
-//        }
-
-//                    $pig = $pig->toArray();
-//                    ArrayHelper::setValue($pig, 'photos', $photos);
-            return $pig;
-        } else {
-            throw new NotFoundHttpException('Объект не найден');
-        }
-    }
-
-    public function actionCreate(): Pig|array
-    {
-        $formData = \Yii::$app->request->post();
-
-        $newPig = new Pig();
-        $newPig->load($formData, '');
-        $files = UploadedFile::getInstancesByName('files');
-        $newPig->files = $files;
-
-        if ($newPig->validate()) {
-            $newPig->save(false);
-
-            if ($files) {
-                foreach ($files as $file) {
-                    $photo = new Photo();
-
-                    try {
-                        $photo->upload($file);
-                    } catch (\Exception $exception) {
-                        error_log($exception->getMessage());
-                    }
-
-                    $newPig->linkPhoto($photo);
-                }
-            }
-
-            return $newPig;
-        }
-
-        return $this->validationFailed($newPig);
     }
 
     /**
@@ -98,40 +44,22 @@ class PigsController extends ApiController
             $formData = \Yii::$app->request->getBodyParams();
 
             $pig->load($formData, '');
-            $files = UploadedFile::getInstancesByName('files');
-
-            if (!empty($files) && $files[0]->size) {
-                $pig->files = $files;
-            }
 
             if ($formData and $pig->validate()) {
 
                 // Получаем уже имеющиеся фотографии
-                $old_photos = $formData['old_photos'];
-
-                // Декодируем массив с именами фотографий
-                $old_photos = Json::decode($old_photos);
+                $old_photos = Json::decode($formData['old_photos']);
 
                 // Сравниваем фотографии с загруженными ранее
                 $difference = $pig->comparePhotos($old_photos);
 
                 // Удаляем лишние фотографии
                 foreach ($difference as $photo) {
-                    $photo = Photo::find()->where(['image' => $photo])->one();
+                    $photo = Photo::findOne(['image' => $photo]);
                     $pig->unlinkPhoto($photo);
                 }
 
-                if (!empty($files) && $files[0]->size) {
-                    foreach ($files as $file) {
-                        $photo = new Photo();
-                        try {
-                            $photo->upload($file);
-                            $pig->linkPhoto($photo);
-                        } catch (\Exception $e) {
-                            $pig->addError('files', $e->getMessage());
-                        }
-                    }
-                }
+                $pig->handlePhotos();
 
                 $pig->save(false);
                 $pig->refresh();
@@ -144,6 +72,15 @@ class PigsController extends ApiController
         throw new NotFoundHttpException('Объект не найден');
     }
 
+    /**
+     * Свинок удалять нельзя!
+     * @throws MethodNotAllowedHttpException
+     */
+    public function actionDelete(int $id): \yii\web\Response
+    {
+        throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
+    }
+
     public function actionGraduate(int $id): Pig
     {
         $pig = Pig::findOne($id);
@@ -154,15 +91,6 @@ class PigsController extends ApiController
         }
 
         return $pig;
-    }
-
-    /**
-     * Свинок удалять нельзя!
-     * @throws MethodNotAllowedHttpException
-     */
-    public function actionDelete(int $id)
-    {
-        throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 
     public function actionRandomize(int $number, string $graduated = ''): Pig|array|null

@@ -2,13 +2,18 @@
 
 namespace app\controllers;
 
+use app\models\EntityWithPhotos;
+use app\models\Photo;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 class ApiController extends \yii\rest\Controller
 {
     public $layout = false;
+    public string $modelClass;
 
     public static function allowedDomains(): array
     {
@@ -52,11 +57,11 @@ class ApiController extends \yii\rest\Controller
 
     protected function allowedActions(): array
     {
-        return ['get', 'index', 'login', 'randomize'];
+        return ['get', 'index', 'randomize'];
     }
 
     /**
-     * Возврат ошибок валидации модели с кодом 400
+     * Возврат ошибок валидации модели
      * @param ActiveRecord $model
      * @return array
      */
@@ -72,7 +77,7 @@ class ApiController extends \yii\rest\Controller
      * @param int $perPage
      * @return array
      */
-    protected function paginate(ActiveQuery $query, int $perPage = 5)
+    protected function paginate(ActiveQuery $query, int $perPage = 5): array
     {
         $pagination = new Pagination([
             'totalCount' => $query->count(),
@@ -92,5 +97,62 @@ class ApiController extends \yii\rest\Controller
                 'pageCount' => $pagination->pageCount
             ]
         ];
+    }
+
+    public function actionIndex(): array
+    {
+        return $this->modelClass::find()->all();
+    }
+
+    /**
+     * @param int $id ID записи
+     * @throws NotFoundHttpException Ошибка 404 при неверном ID
+     */
+    public function actionGet(int $id): EntityWithPhotos|array|null
+    {
+        $entry = $this->modelClass::findOne($id);
+
+        if ($entry) {
+            return $entry;
+        } else {
+            throw new NotFoundHttpException('Объект не найден');
+        }
+    }
+
+    public function actionCreate(): EntityWithPhotos|array
+    {
+        $formData = \Yii::$app->request->post();
+
+        $newEntry = new $this->modelClass();
+        $newEntry->load($formData, '');
+
+        if ($newEntry->validate()) {
+            $newEntry->save(false);
+
+            $newEntry->handlePhotos();
+
+            return $newEntry;
+        }
+
+        return $this->validationFailed($newEntry);
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionDelete(int $id): \yii\web\Response
+    {
+        $entry = $this->modelClass::findOne($id);
+
+        if ($entry) {
+            $entry->unlinkAllPhotos();
+            $entry->delete();
+
+            \Yii::$app->response->statusCode = 204;
+
+            return \Yii::$app->response;
+        }
+
+        throw new NotFoundHttpException('Запись с таким ID не найдена');
     }
 }

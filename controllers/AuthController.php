@@ -9,7 +9,12 @@ class AuthController extends ApiController
 {
     public string $modelClass = 'app\models\Admin';
 
-    public function actionLogin()
+    protected function allowedActions(): array
+    {
+        return ['login'];
+    }
+
+    public function actionLogin(): array
     {
         $post = \Yii::$app->request->post();
 
@@ -32,7 +37,7 @@ class AuthController extends ApiController
         return $this->validationFailed($user ?? $auth);
     }
 
-    public function actionLogout()
+    public function actionLogout(): void
     {
         $token = substr(\Yii::$app->request->getHeaders()['authorization'], 7);
         $admin = Admin::findIdentityByAccessToken($token);

@@ -52,7 +52,6 @@ $config = [
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'article',
-//                    'except' => ['view', 'create'],
                     'patterns' => [
                         'GET type/<type_id:[1-2]>' => 'index',
                         'GET <id>' => 'get',
@@ -76,6 +75,7 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['requests' => 'turn-in'],
                     'patterns' => [
+                        'GET' => 'index',
                         'GET <id>' => 'get',
                         'POST turnin' => 'create',
                         'DELETE <id>' => 'delete'
@@ -86,7 +86,8 @@ $config = [
                     'controller' => ['admin' => 'auth'],
                     'patterns' => [
                         'POST login' => 'login',
-                        'POST logout' => 'logout'
+                        'POST logout' => 'logout',
+                        'HEAD' => 'check'
                     ],
                 ],
             ],

@@ -3,56 +3,38 @@
 namespace app\controllers;
 
 use app\models\Article;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\models\Photo;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\Response;
 use yii\web\UploadedFile;
 
 class ArticleController extends ApiController
 {
-    public function actionIndex(?int $type_id = null): array
-    {
-        $articles = Article::find();
+    public string $modelClass = Article::class;
 
+    public function actionIndex(int $type_id = null): array
+    {
         if ($type_id) {
-            $articles = $articles->where("type_id = $type_id");
+            $articles = Article::find()->where("type_id = $type_id");
+
+            return $this->paginate($articles->orderBy('datetime DESC'));
         }
 
-        return $this->paginate($articles->orderBy('datetime DESC'));
+        throw new BadRequestHttpException();
     }
 
-    public function actionGet(int $id)
+    public function actionCreate(int $type_id = null): Article|array
     {
-        $article = Article::findOne($id);
-
-        if ($article) {
-//            if ($article->getPhotos()) {
-//                $photos = $article->getPhotos()->select('image')->asArray()->all();
-//                $photos = ArrayHelper::getColumn($photos, 'image');
-//
-//                if ($photos) {
-//                    $article = $article->toArray();
-//                    ArrayHelper::setValue($article, 'photos', $photos);
-//                }
-//            }
-            return $article;
+        if (!$type_id) {
+            throw new BadRequestHttpException();
         }
 
-        throw new NotFoundHttpException('Объект не найден');
-    }
-
-    public function actionCreate(int $type_id): Article|array
-    {
         $formData = \Yii::$app->request->post();
 
         $newArticle = new Article();
         $newArticle->load($formData, '');
         $newArticle->type_id = $type_id;
-
-        $files = UploadedFile::getInstancesByName('files');
-        $newArticle->files = $files;
         $photos = [];
 
         // если создаётся статья из полнотекстового редактора
@@ -63,22 +45,12 @@ class ArticleController extends ApiController
         if (empty($newArticle->errors) and $newArticle->validate()) {
             $newArticle->save(false);
 
-            if ($files) {
-                $newArticle->files = $files;
-                foreach ($files as $file) {
-                    $photo = new Photo();
-
-                    try {
-                        $photo->upload($file);
-                        $photos[] = $photo;
-                    } catch (\Exception $exception) {
-                        $newArticle->addError('files', $exception->getMessage());
-                    }
+            if ($newArticle->type_id === 1) {
+                foreach ($photos as $photo) {
+                    $newArticle->linkPhoto($photo);
                 }
-            }
-
-            foreach ($photos as $photo) {
-                $newArticle->linkPhoto($photo);
+            } else {
+                $newArticle->handlePhotos();
             }
 
             return $newArticle;
@@ -98,11 +70,6 @@ class ArticleController extends ApiController
             $formData = \Yii::$app->request->bodyParams;
 
             $article->load($formData, '');
-            $files = UploadedFile::getInstancesByName('files');
-
-            if (!empty($files) && $files[0]->size) {
-                $article->files = $files;
-            }
 
             if ($formData and $article->validate()) {
                 $photos = [];
@@ -121,30 +88,21 @@ class ArticleController extends ApiController
                 }
 
                 // Удаляем лишние фотографии
-                foreach ($difference as $photo) {
+                foreach ($difference as $filename) {
                     try {
-                        $article->unlinkPhoto(Photo::find()->where(['image' => $photo])->one());
+                        $article->unlinkPhoto(Photo::find()->where(['image' => $filename])->one());
                     } catch (\Exception $e) {
                         error_log($e->getMessage());
                     }
                 }
 
                 // Загружаем новые из формы
-                if (!empty($files) && $files[0]->size) {
-                    foreach ($files as $file) {
-                        $photo = new Photo();
-                        try {
-                            $photo->upload($file);
-                            $photos[] = $photo;
-                        } catch (\Exception $e) {
-                            $article->addError('files', $e->getMessage());
-                        }
+                if ($article->type_id === 1) {
+                    foreach ($photos as $photo) {
+                        $article->linkPhoto($photo);
                     }
-                }
-
-                // Прикрепление фотографий
-                foreach ($photos as $photo) {
-                    $article->linkPhoto($photo);
+                } else {
+                    $article->handlePhotos();
                 }
 
                 $article->save(false);
@@ -157,31 +115,5 @@ class ArticleController extends ApiController
         }
 
         throw new NotFoundHttpException('Объект не найден');
-    }
-
-    /**
-     * @throws NotFoundHttpException
-     */
-    public function actionDelete(int $id): Response
-    {
-        $article = Article::findOne($id);
-
-        if ($article) {
-            // Находим имеющиеся фотографии
-            $article_photos = $article->photos;
-            $article_photos = ArrayHelper::getColumn($article_photos, 'image');
-
-            foreach ($article_photos as $photo) {
-                $article->unlinkPhoto($photo);
-            }
-
-            $article->delete();
-
-            \Yii::$app->response->statusCode = 204;
-
-            return \Yii::$app->response;
-        }
-
-        throw new NotFoundHttpException('Запись с таким ID не найдена');
     }
 }

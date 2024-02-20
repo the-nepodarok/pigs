@@ -4,6 +4,7 @@ namespace app\models;
 
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\web\UploadedFile;
 
 /**
  * @property string|null $main_photo;
@@ -20,12 +21,20 @@ class EntityWithPhotos extends ActiveRecord
         parent::__construct($config);
 
         // Получение названия класса
-        $this->className = lcfirst(
-            basename(
-                get_class($this)
-            ));
+        $reflection = new \ReflectionClass($this);
+        $this->className = lcfirst($reflection->getShortName());
     }
 
+    public function load($data, $formName = null): bool
+    {
+        $files = UploadedFile::getInstancesByName('files');
+
+        if (!empty($files) && $files[0]->size) {
+            $this->files = $files;
+        }
+
+        return parent::load($data, $formName);
+    }
 
     public function afterFind(): void
     {
@@ -114,5 +123,23 @@ class EntityWithPhotos extends ActiveRecord
 
         // Сравниваем пришедшие имена фотографий с теми, что уже имеются
         return array_diff($current_photos, $old_photos);
+    }
+
+    public function handlePhotos(): void
+    {
+        if ($this->files) {
+            foreach ($this->files as $file) {
+                $photo = new Photo();
+
+                try {
+                    $photo->upload($file);
+                    $this->linkPhoto($photo);
+                } catch (\Exception $exception) {
+                    $this->addError('files', $exception->getMessage());
+                }
+
+                $this->linkPhoto($photo);
+            }
+        }
     }
 }
