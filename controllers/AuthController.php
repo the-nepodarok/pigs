@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\models\Admin;
-use Psy\Util\Json;
+use yii\web\UnauthorizedHttpException;
 
 class AuthController extends ApiController
 {
@@ -45,5 +45,19 @@ class AuthController extends ApiController
         $admin->save();
 
         \Yii::$app->response->statusCode = 205;
+    }
+
+    /**
+     * Проверка актуальности токена по заголовку авторизации
+     * @throws UnauthorizedHttpException
+     */
+    public function actionCheck(): void
+    {
+        $token = substr(\Yii::$app->request->getHeaders()['authorization'], 7);
+        $admin = Admin::findIdentityByAccessToken($token);
+
+        if (!$admin) {
+            throw new UnauthorizedHttpException();
+        }
     }
 }
