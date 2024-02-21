@@ -3,12 +3,10 @@
 namespace app\controllers;
 
 use app\models\EntityWithPhotos;
-use app\models\Photo;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\NotFoundHttpException;
-use yii\web\UploadedFile;
 
 class ApiController extends \yii\rest\Controller
 {
@@ -27,6 +25,12 @@ class ApiController extends \yii\rest\Controller
         return [
             'GET', 'POST', 'PATCH', 'DELETE',
         ];
+    }
+
+    public function afterAction($action, $result)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return parent::afterAction($action, $result);
     }
 
     public function behaviors(): array
