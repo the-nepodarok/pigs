@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Photo;
 use app\models\Pig;
+use app\models\Status;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
@@ -24,9 +25,9 @@ class PigsController extends ApiController
         $pigs = Pig::find();
 
         if ($graduated and $graduated === 'graduated') {
-            $pigs = $pigs->where('graduated');
+            $pigs = $pigs->where(['!=', 'status_id', '1']);
         } else {
-            $pigs = $pigs->where(['graduated' => false]);
+            $pigs = $pigs->where(['status_id' => 1]);
         }
 
         return $this->paginate($pigs->orderBy('datetime DESC'), 15);
@@ -83,12 +84,13 @@ class PigsController extends ApiController
         throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 
-    public function actionGraduate(int $id): Pig
+    public function actionGraduate(int $id, string $type): Pig
     {
         $pig = Pig::findOne($id);
+        $status = Status::find()->where(['value' => $type])->one();
 
         if ($pig) {
-            $pig->graduated = true;
+            $pig->status_id = $status->id;
             $pig->save(false);
         }
 
@@ -97,16 +99,16 @@ class PigsController extends ApiController
 
     public function actionRandomize(int $number, string $graduated = ''): Pig|array|null
     {
-        $isGraduated = false;
+        $graduatedStatus = 1; // looking-for-home
 
         if ($graduated === 'graduated') {
-            $isGraduated = true;
+            $graduatedStatus = 2; // graduated
         }
 
         $pigs = Pig::find()
             ->select('pigs.id, name, image')
             ->joinWith('photos', false,'INNER JOIN')
-            ->where(['IN','graduated', $isGraduated])
+            ->where(['IN','status_id', $graduatedStatus])
             ->groupBy('pigs.id')
             ->orderBy('RANDOM()')->limit($number);
 

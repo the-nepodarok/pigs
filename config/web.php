@@ -68,7 +68,7 @@ $config = [
                         'GET random/<number:\d+>/<graduated:\w+>' => 'randomize',
                         'GET <id:\d+>' => 'get',
                         'GET <graduated:\w+>' => 'index',
-                        'PATCH graduate/<id>' => 'graduate',
+                        'PATCH graduate/<id>/<type:\w+>' => 'graduate',
                     ],
                 ],
                 [
