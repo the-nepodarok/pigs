@@ -47,16 +47,18 @@ class PigsController extends ApiController
 
             if ($formData and $pig->validate()) {
 
-                // Получаем уже имеющиеся фотографии
-                $old_photos = Json::decode($formData['old_photos']);
+                if (isset($formData['old_photos'])) {
+                    // Получаем уже имеющиеся фотографии
+                    $old_photos = Json::decode($formData['old_photos']);
 
-                // Сравниваем фотографии с загруженными ранее
-                $difference = $pig->comparePhotos($old_photos);
+                    // Сравниваем фотографии с загруженными ранее
+                    $difference = $pig->comparePhotos($old_photos);
 
-                // Удаляем лишние фотографии
-                foreach ($difference as $photo) {
-                    $photo = Photo::findOne(['image' => $photo]);
-                    $pig->unlinkPhoto($photo);
+                    // Удаляем лишние фотографии
+                    foreach ($difference as $photo) {
+                        $photo = Photo::findOne(['image' => $photo]);
+                        $pig->unlinkPhoto($photo);
+                    }
                 }
 
                 $pig->handlePhotos();
