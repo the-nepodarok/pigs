@@ -15,6 +15,7 @@ class EntityWithPhotos extends ActiveRecord
     public ?string $main_photo = null;
     public ?array $files = null;
     public string $className;
+    public string $datetime = '';
 
     public function __construct($config = [])
     {
@@ -36,12 +37,18 @@ class EntityWithPhotos extends ActiveRecord
         return parent::load($data, $formName);
     }
 
+    public function beforeSave($insert): bool
+    {
+        $this->datetime = date('Y-m-d H:i:s');
+        return parent::beforeSave($insert);
+    }
+
     public function afterFind(): void
     {
         parent::afterFind();
 
         // Устанавливает отображение даты по заданному часовому поясу
-        $time = strtotime($this->datetime.' UTC');
+        $time = strtotime($this->datetime.' Europe/Moscow');
         $this->datetime = date("Y-m-d H:i:s", $time);
     }
 
