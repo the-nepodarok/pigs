@@ -10,7 +10,7 @@ use yii\db\ActiveQuery;
  * @property int $id
  * @property string $name
  * @property string|null $description
- * @property bool|null $graduated
+ * @property int|null $status_id
  * @property string|null $datetime
  *
  * @property Photo[] $photos
@@ -32,7 +32,7 @@ class Pig extends EntityWithPhotos
         return array_merge($rules, [
             [['name', 'description'], 'required', 'message' => '{attribute} не должно быть пустым'],
             [['name', 'description', 'age', 'main_photo'], 'string'],
-            [['graduated'], 'boolean'],
+            [['status_id'], 'integer'],
             [['name', 'description', 'age', 'main_photo', 'files'], 'safe'],
         ]);
     }
@@ -46,7 +46,7 @@ class Pig extends EntityWithPhotos
             'id' => 'ID',
             'name' => 'Имя свинки',
             'description' => 'Описание',
-            'graduated' => 'Нашёл дом',
+            'status_id' => 'Нашёл дом',
             'datetime' => 'Дата создания',
             'main_photo' => 'Фото',
             'files' => 'Фото',
@@ -61,6 +61,16 @@ class Pig extends EntityWithPhotos
     public function getPhotos(): ActiveQuery
     {
         return $this->hasMany(Photo::class, ['pig_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Status]].
+     *
+     * @return \yii\db\ActiveQuery|StatusQuery
+     */
+    public function getStatus(): ActiveQuery
+    {
+        return $this->hasOne(Status::class, ['id' => 'status_id']);
     }
 
     /**
