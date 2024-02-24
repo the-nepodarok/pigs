@@ -17,8 +17,9 @@ class m231130_180618_create_pigs_table extends Migration
             'name' => $this->text()->notNull(),
             'age' => $this->text(),
             'description' => $this->text()->defaultExpression('NULL'),
-            'graduated' => $this->boolean()->defaultValue(false),
             'datetime' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
+            'status_id' => $this->integer()->notNull()->defaultValue(1),
+            'FOREIGN KEY (status_id) REFERENCES status(id)'
         ]);
     }
 
@@ -27,6 +28,7 @@ class m231130_180618_create_pigs_table extends Migration
      */
     public function safeDown()
     {
+        $this->execute('PRAGMA foreign_keys = OFF');
         $this->dropTable('{{%pigs}}');
     }
 }
