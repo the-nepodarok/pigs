@@ -42,15 +42,6 @@ class EntityWithPhotos extends ActiveRecord
         return parent::beforeSave($insert);
     }
 
-    public function afterFind(): void
-    {
-        parent::afterFind();
-
-        // Устанавливает отображение даты по заданному часовому поясу
-        $time = strtotime($this->datetime);
-        $this->datetime = date("Y-m-d H:i:s", $time);
-    }
-
     public function rules(): array
     {
         return [
