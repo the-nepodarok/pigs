@@ -35,7 +35,7 @@ class Pig extends EntityWithPhotos
 
         return array_merge($rules, [
             [['name', 'description'], 'required', 'message' => '{attribute} не должно быть пустым'],
-            [['city_id'], 'required', 'message' => '{attribute} должен быть выбран'],
+            [['city_id'], 'required', 'message' => 'Выберите город'],
             [['sex'], 'required', 'message' => 'Укажите пол'],
             [['name', 'description', 'age', 'main_photo', 'sex'], 'string'],
             [['status_id', 'city_id', 'overseer_id'], 'integer'],
