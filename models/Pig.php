@@ -10,6 +10,8 @@ use yii\db\ActiveQuery;
  * @property int $id
  * @property string $name
  * @property string|null $description
+ * @property string|null $sex
+ * @property string|null $age
  * @property int|null $status_id
  * @property int|null $city_id
  * @property int|null $overseer_id
@@ -33,9 +35,11 @@ class Pig extends EntityWithPhotos
 
         return array_merge($rules, [
             [['name', 'description'], 'required', 'message' => '{attribute} не должно быть пустым'],
-            [['name', 'description', 'age', 'main_photo'], 'string'],
+            [['city_id'], 'required', 'message' => '{attribute} должен быть выбран'],
+            [['sex'], 'required', 'message' => 'Укажите пол'],
+            [['name', 'description', 'age', 'main_photo', 'sex'], 'string'],
             [['status_id', 'city_id', 'overseer_id'], 'integer'],
-            [['name', 'description', 'age', 'main_photo', 'files', 'city_id', 'overseer_id'], 'safe'],
+            [['name', 'description', 'age', 'main_photo', 'files', 'city_id', 'overseer_id', 'sex'], 'safe'],
         ]);
     }
 
@@ -51,7 +55,7 @@ class Pig extends EntityWithPhotos
 
     public function extraFields()
     {
-        // Добавление полей с куратором и городом
+        // Добавление полей с фотографиями, куратором и городом
         return ['photos', 'overseer', 'city'];
     }
 
@@ -66,6 +70,7 @@ class Pig extends EntityWithPhotos
             'description' => 'Описание',
             'status_id' => 'Нашёл дом',
             'overseer_id' => 'Куратор',
+            'sex' => 'Пол',
             'city_id' => 'Город',
             'datetime' => 'Дата создания',
             'graduation_date' => 'Дата выпуска',
