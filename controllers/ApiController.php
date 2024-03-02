@@ -17,6 +17,8 @@ class ApiController extends \yii\rest\Controller
     {
         return [
             'http://localhost:5173',
+            'https://piggy-hus.vercel.app',
+            'https://domiksvinok.ru'
         ];
     }
 

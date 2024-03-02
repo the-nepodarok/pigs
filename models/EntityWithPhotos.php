@@ -47,12 +47,12 @@ class EntityWithPhotos extends ActiveRecord
         return [
             [['files'], 'image',
                 'maxFiles' => 0,
-                'maxSize' => 3e+6,
+                'maxSize' => 4e+6,
                 'skipOnEmpty' => true,
                 'extensions' => ['jpg', 'jpeg'],
                 'wrongExtension' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
                 'wrongMimeType' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
-                'tooBig' => 'Файл слишком большой. Максимально допустимый размер: 3MB'
+                'tooBig' => 'Файл слишком большой. Максимально допустимый размер: 4MB'
             ],
         ];
     }
@@ -104,7 +104,9 @@ class EntityWithPhotos extends ActiveRecord
 
     public function unlinkAllPhotos(): void
     {
-        array_walk($this->photos, [$this, 'unlinkPhoto']);
+        foreach ($this->photos as $photo) {
+            $this->unlinkPhoto($photo);
+        }
     }
 
     /**
