@@ -18,8 +18,8 @@ class m231130_181605_create_photos_table extends Migration
             'article_id' => $this->integer(),
             'pig_id' => $this->integer(),
             'turn_in_id' => $this->integer(),
-            'FOREIGN KEY (article_id) REFERENCES articles(id)',
-            'FOREIGN KEY (pig_id) REFERENCES pigs(id)',
+            'FOREIGN KEY (article_id) REFERENCES articles(id) ON UPDATE CASCADE',
+            'FOREIGN KEY (pig_id) REFERENCES pigs(id) ON UPDATE CASCADE',
             'FOREIGN KEY (turn_in_id) REFERENCES turn_in(id)',
         ]);
     }
