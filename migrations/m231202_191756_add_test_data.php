@@ -16,6 +16,7 @@ class m231202_191756_add_test_data extends Migration
             'id' => 1,
             'name' => 'Кьянти',
             'age' => '3 с половиной годика',
+            'sex' => 'M',
             'description' => 'Красотулькин',
         ]);
 
@@ -23,6 +24,9 @@ class m231202_191756_add_test_data extends Migration
             'id' => 2,
             'name' => 'Финик',
             'age' => '???',
+            'sex' => 'M',
+            'overseer_id' => 16,
+            'city_id' => 1,
             'description' => 'Солнечный Принц',
         ]);
 
