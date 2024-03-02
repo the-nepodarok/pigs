@@ -11,6 +11,8 @@ use yii\db\ActiveQuery;
  * @property string $name
  * @property string|null $description
  * @property int|null $status_id
+ * @property int|null $city_id
+ * @property int|null $overseer_id
  * @property string|null $datetime
  *
  * @property Photo[] $photos
@@ -32,9 +34,25 @@ class Pig extends EntityWithPhotos
         return array_merge($rules, [
             [['name', 'description'], 'required', 'message' => '{attribute} не должно быть пустым'],
             [['name', 'description', 'age', 'main_photo'], 'string'],
-            [['status_id'], 'integer'],
-            [['name', 'description', 'age', 'main_photo', 'files'], 'safe'],
+            [['status_id', 'city_id', 'overseer_id'], 'integer'],
+            [['name', 'description', 'age', 'main_photo', 'files', 'city_id', 'overseer_id'], 'safe'],
         ]);
+    }
+
+    public function fields(): array
+    {
+        $fields = parent::fields();
+
+        // Скрытие полей с id города и куратора
+        unset($fields['city_id'], $fields['overseer_id']);
+        return $fields;
+    }
+
+
+    public function extraFields()
+    {
+        // Добавление полей с куратором и городом
+        return ['overseer', 'city'];
     }
 
     /**
@@ -47,7 +65,10 @@ class Pig extends EntityWithPhotos
             'name' => 'Имя свинки',
             'description' => 'Описание',
             'status_id' => 'Нашёл дом',
+            'overseer_id' => 'Куратор',
+            'city_id' => 'Город',
             'datetime' => 'Дата создания',
+            'graduation_date' => 'Дата выпуска',
             'main_photo' => 'Фото',
             'files' => 'Фото',
         ];
@@ -71,6 +92,26 @@ class Pig extends EntityWithPhotos
     public function getStatus(): ActiveQuery
     {
         return $this->hasOne(Status::class, ['id' => 'status_id']);
+    }
+
+    /**
+     * Gets query for [[City]].
+     *
+     * @return \yii\db\ActiveQuery|CityQuery
+     */
+    public function getCity(): ActiveQuery
+    {
+        return $this->hasOne(City::class, ['id' => 'city_id']);
+    }
+
+    /**
+     * Gets query for [[Overseer]].
+     *
+     * @return \yii\db\ActiveQuery|OverseerQuery
+     */
+    public function getOverseer(): ActiveQuery
+    {
+        return $this->hasOne(Overseer::class, ['id' => 'overseer_id']);
     }
 
     /**
