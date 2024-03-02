@@ -19,7 +19,11 @@ class m231130_180618_create_pigs_table extends Migration
             'description' => $this->text()->defaultExpression('NULL'),
             'datetime' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
             'status_id' => $this->integer()->notNull()->defaultValue(1),
-            'FOREIGN KEY (status_id) REFERENCES status(id)'
+            'overseer_id' => $this->integer()->null(),
+            'city_id' => $this->integer()->notNull()->defaultValue(1),
+            'FOREIGN KEY (status_id) REFERENCES status(id)',
+            'FOREIGN KEY (overseer_id) REFERENCES overseer(id)',
+            'FOREIGN KEY (city_id) REFERENCES city(id)',
         ]);
     }
 

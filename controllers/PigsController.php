@@ -5,9 +5,9 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use app\models\Status;
+use Yii;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\UploadedFile;
 use yii\helpers\Json;
 
 class PigsController extends ApiController
@@ -30,6 +30,7 @@ class PigsController extends ApiController
             $pigs = $pigs->where(['status_id' => 1]);
         }
 
+        $pigs = $pigs->Joinwith('city');
         return $this->paginate($pigs->orderBy('datetime DESC'), 15);
     }
 
