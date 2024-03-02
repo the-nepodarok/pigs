@@ -17,10 +17,13 @@ class m231202_191756_add_test_data extends Migration
     public function safeUp()
     {
         $this->insert('pigs', [
-            'id' => 1,
+            'id' => 2,
             'name' => 'Финик',
+            'age' => '???',
+            'sex' => 'M',
+            'overseer_id' => 16,
+            'city_id' => 1,
             'description' => 'Солнечный Принц',
-            'status_id' => 2
         ]);
 
         $this->insert('photos', [

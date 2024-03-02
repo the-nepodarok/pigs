@@ -76,6 +76,31 @@ class m221123_122547_add_overseer_data extends Migration
             'id' => 13,
             'overseer_name' => 'Куратор Анастасия Ткаченко',
         ]);
+
+        $this->insert('overseer', [
+            'id' => 14,
+            'overseer_name' => 'Ангелина, Домик Оттона',
+        ]);
+
+        $this->insert('overseer', [
+            'id' => 15,
+            'overseer_name' => 'Светлана, Домик Хрюнделя',
+        ]);
+
+        $this->insert('overseer', [
+            'id' => 16,
+            'overseer_name' => 'Лиана, Домик Рыси',
+        ]);
+
+        $this->insert('overseer', [
+            'id' => 17,
+            'overseer_name' => 'Елена, Домик Букли',
+        ]);
+
+        $this->insert('overseer', [
+            'id' => 18,
+            'overseer_name' => 'Анна, Домик Пикселя',
+        ]);
     }
 
     /**
