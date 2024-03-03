@@ -25,9 +25,9 @@ class PigsController extends ApiController
         $pigs = Pig::find();
 
         if ($graduated and $graduated === 'graduated') {
-            $pigs = $pigs->where(['!=', 'status_id', '1']);
+            $pigs = $pigs->where(['!=', 'status_id', '1'])->andWhere(['!=', 'status_id', '6']);
         } else {
-            $pigs = $pigs->where(['status_id' => 1]);
+            $pigs = $pigs->where(['status_id' => 1])->orWhere(['status_id' => 6]);
         }
 
         $pigs = $pigs->Joinwith('city');
@@ -92,6 +92,7 @@ class PigsController extends ApiController
 
         if ($pig) {
             $pig->status_id = $status->id;
+            $pig->graduation_date = date('Y-m-d H:i:s');
             $pig->save(false);
         }
 

@@ -15,6 +15,7 @@ class m221123_102254_create_overseer_table extends Migration
         $this->createTable('{{%overseer}}', [
             'id' => $this->primaryKey(),
             'overseer_name' => $this->text(),
+            'active' => $this->boolean()->defaultValue(true),
         ]);
     }
 

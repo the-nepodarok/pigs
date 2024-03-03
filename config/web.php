@@ -104,6 +104,13 @@ $config = [
                         'GET' => 'index',
                     ],
                 ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['status'],
+                    'patterns' => [
+                        'GET' => 'index',
+                    ],
+                ],
             ],
         ],
     ],

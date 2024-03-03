@@ -16,6 +16,7 @@ use yii\db\ActiveQuery;
  * @property int|null $city_id
  * @property int|null $overseer_id
  * @property string|null $datetime
+ * @property string|null $graduation_date
  *
  * @property Photo[] $photos
  */
@@ -56,7 +57,7 @@ class Pig extends EntityWithPhotos
     public function extraFields()
     {
         // Добавление полей с фотографиями, куратором и городом
-        return ['photos', 'overseer', 'city'];
+        return ['photos', 'overseer', 'city', 'status'];
     }
 
     /**
@@ -77,6 +78,11 @@ class Pig extends EntityWithPhotos
             'main_photo' => 'Фото',
             'files' => 'Фото',
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        return $this->datetime = $this->datetime;
     }
 
     /**

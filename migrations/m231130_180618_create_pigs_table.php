@@ -19,6 +19,7 @@ class m231130_180618_create_pigs_table extends Migration
             'sex' => $this->text()->notNull(),
             'description' => $this->text()->defaultExpression('NULL'),
             'datetime' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
+            'graduation_date' => $this->dateTime()->null(),
             'status_id' => $this->integer()->notNull()->defaultValue(1),
             'overseer_id' => $this->integer()->null(),
             'city_id' => $this->integer()->notNull()->defaultValue(1),
