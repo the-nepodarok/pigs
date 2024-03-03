@@ -15,6 +15,7 @@ class m221123_123234_create_status_table extends Migration
         $this->createTable('{{%status}}', [
             'id' => $this->primaryKey(),
             'value' => $this->text(),
+            'text' => $this->text(),
         ]);
     }
 
