@@ -90,6 +90,20 @@ $config = [
                         'HEAD' => 'check'
                     ],
                 ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['city'],
+                    'patterns' => [
+                        'GET' => 'index',
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['overseer'],
+                    'patterns' => [
+                        'GET' => 'index',
+                    ],
+                ],
             ],
         ],
     ],
