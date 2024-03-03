@@ -15,6 +15,7 @@ class m221123_122547_add_overseer_data extends Migration
         $this->insert('overseer', [
             'id' => 1,
             'overseer_name' => 'Юлия, Домик Лисы',
+            'active' => false,
         ]);
 
         $this->insert('overseer', [
@@ -80,26 +81,31 @@ class m221123_122547_add_overseer_data extends Migration
         $this->insert('overseer', [
             'id' => 14,
             'overseer_name' => 'Ангелина, Домик Оттона',
+            'active' => false,
         ]);
 
         $this->insert('overseer', [
             'id' => 15,
             'overseer_name' => 'Светлана, Домик Хрюнделя',
+            'active' => false,
         ]);
 
         $this->insert('overseer', [
             'id' => 16,
             'overseer_name' => 'Лиана, Домик Рыси',
+            'active' => false,
         ]);
 
         $this->insert('overseer', [
             'id' => 17,
             'overseer_name' => 'Елена, Домик Букли',
+            'active' => false,
         ]);
 
         $this->insert('overseer', [
             'id' => 18,
             'overseer_name' => 'Анна, Домик Пикселя',
+            'active' => false,
         ]);
     }
 
