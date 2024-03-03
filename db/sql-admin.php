@@ -5018,7 +5018,7 @@ if(isset($_GET['action']) && !isset($_GET['confirm']))
 					elseif(preg_match('/^BLOB/', $type) && $hexblobs)
 						$value = htmlencode(bin2hex(trim(trim($tableInfo[$i]['dflt_value']), "'")));
 					else
-						$value = htmlencode(trim(trim($tableInfo[$i]['dflt_value']), "'"));
+						$value = htmlencode(trim(trim($tableInfo[$i]['dflt_value'] ?? ''), "'"));
 					$tdWithClassLeft = "<td class='td".($i%2 ? "1" : "2")."' style='text-align:left;'>";
 					echo "<tr>";
 					echo $tdWithClassLeft;
