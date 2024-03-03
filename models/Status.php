@@ -50,7 +50,7 @@ class Status extends \yii\db\ActiveRecord
      */
     public function getPigs()
     {
-        return $this->hasMany(Pigs::class, ['status_id' => 'id']);
+        return $this->hasMany(Pig::class, ['status_id' => 'id']);
     }
 
     /**
