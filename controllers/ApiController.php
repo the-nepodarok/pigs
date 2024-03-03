@@ -12,6 +12,7 @@ class ApiController extends \yii\rest\Controller
 {
     public $layout = false;
     public string $modelClass;
+    public string $sortOption = 'datetime';
 
     public static function allowedDomains(): array
     {
@@ -107,7 +108,7 @@ class ApiController extends \yii\rest\Controller
 
     public function actionIndex(): array
     {
-        return $this->modelClass::find()->all();
+        return $this->modelClass::find()->orderBy($this->sortOption)->all();
     }
 
     /**
