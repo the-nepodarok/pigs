@@ -30,6 +30,11 @@ class ApiController extends \yii\rest\Controller
         ];
     }
 
+    protected function allowedActions(): array
+    {
+        return ['get', 'index', 'randomize'];
+    }
+
     public function afterAction($action, $result)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -60,11 +65,6 @@ class ApiController extends \yii\rest\Controller
         ];
 
         return $bh;
-    }
-
-    protected function allowedActions(): array
-    {
-        return ['get', 'index', 'randomize'];
     }
 
     /**
