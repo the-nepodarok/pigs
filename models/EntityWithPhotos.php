@@ -38,7 +38,10 @@ class EntityWithPhotos extends ActiveRecord
 
     public function beforeSave($insert): bool
     {
-        $this->datetime = date('Y-m-d H:i:s');
+        if ($insert)
+            $this->datetime = date('Y-m-d H:i:s');
+        else
+            $this->datetime = $this->datetime;
         return parent::beforeSave($insert);
     }
 
