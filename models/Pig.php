@@ -57,7 +57,7 @@ class Pig extends EntityWithPhotos
     public function extraFields()
     {
         // Добавление полей с фотографиями, куратором и городом
-        return ['photos', 'overseer', 'city', 'status'];
+        return ['photos', 'overseer', 'city', 'sex', 'status'];
     }
 
     /**
@@ -78,11 +78,6 @@ class Pig extends EntityWithPhotos
             'main_photo' => 'Фото',
             'files' => 'Фото',
         ];
-    }
-
-    public function beforeSave($insert): bool
-    {
-        return $this->datetime = $this->datetime;
     }
 
     /**
