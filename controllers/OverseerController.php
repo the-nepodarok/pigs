@@ -18,9 +18,4 @@ class OverseerController extends ApiController
     {
         return ['index'];
     }
-
-    public function actionIndex(): array
-    {
-        return Overseer::find()->where(['active' => true])->all();
-    }
 }
