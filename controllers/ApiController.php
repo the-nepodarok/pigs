@@ -133,6 +133,10 @@ class ApiController extends \yii\rest\Controller
         $newEntry = new $this->modelClass();
         $newEntry->load($formData, '');
 
+        if ($newEntry->id === 0) {
+            unset($newEntry->id);
+        }
+
         if ($newEntry->validate()) {
             $newEntry->save(false);
 
