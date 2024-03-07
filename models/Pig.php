@@ -40,7 +40,8 @@ class Pig extends EntityWithPhotos
             [['sex'], 'required', 'message' => 'Укажите пол'],
             [['name', 'description', 'age', 'main_photo', 'sex'], 'string'],
             [['status_id', 'city_id', 'overseer_id'], 'integer'],
-            [['name', 'description', 'age', 'main_photo', 'files', 'city_id', 'overseer_id', 'sex'], 'safe'],
+            [['id'], 'unique', 'message' => 'ID уже занят'],
+            [['id', 'name', 'description', 'age', 'main_photo', 'files', 'city_id', 'overseer_id', 'sex'], 'safe'],
         ]);
     }
 
