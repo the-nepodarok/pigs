@@ -5,7 +5,6 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use app\models\Status;
-use Yii;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\helpers\Json;
@@ -25,9 +24,9 @@ class PigsController extends ApiController
         $pigs = Pig::find();
 
         if ($graduated and $graduated === 'graduated') {
-            $pigs = $pigs->where(['!=', 'status_id', '1'])->andWhere(['!=', 'status_id', '6']);
+            $pigs = $pigs->where(['!=', 'status_id', '1'])->andWhere(['!=', 'status_id', '6'])->andWhere(['!=', 'status_id', 5]);
         } else {
-            $pigs = $pigs->where(['status_id' => 1])->orWhere(['status_id' => 6]);
+            $pigs = $pigs->where(['status_id' => 1])->orWhere(['status_id' => 6])->orWhere(['status_id' => 5]);
         }
 
         $pigs = $pigs->Joinwith('city');
