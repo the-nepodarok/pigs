@@ -14,6 +14,9 @@ use Yii;
  */
 class Status extends \yii\db\ActiveRecord
 {
+    const AVAILABLE_STATUSES = [1, 5, 6];
+    const GRADUATED_STATUSES = [2, 3, 4];
+
     /**
      * {@inheritdoc}
      */
