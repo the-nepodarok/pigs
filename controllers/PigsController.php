@@ -22,15 +22,16 @@ class PigsController extends ApiController
     public function actionIndex(string $graduated = ''): array
     {
         $pigs = Pig::find();
+        $order_param = 'datetime';
 
         if ($graduated and $graduated === 'graduated') {
             $pigs = $pigs->where(['status_id' => Status::GRADUATED_STATUSES]);
+            $order_param = 'graduation_date';
         } else {
             $pigs = $pigs->where(['status_id' => Status::AVAILABLE_STATUSES]);
         }
 
-        $pigs = $pigs->Joinwith('city');
-        return $this->paginate($pigs->orderBy('datetime DESC'), 15);
+        return $this->paginate($pigs->orderBy($order_param . ' DESC'), 15);
     }
 
     /**
@@ -91,7 +92,6 @@ class PigsController extends ApiController
 
         if ($pig) {
             $pig->status_id = $status->id;
-            $pig->graduation_date = date('Y-m-d H:i:s');
             $pig->save(false);
         }
 
