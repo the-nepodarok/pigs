@@ -89,6 +89,7 @@ class PigsController extends ApiController
     {
         $pig = Pig::findOne($id);
         $status = Status::find()->where(['value' => $type])->one();
+        $pig->graduation_date = date('Y-m-d');
 
         if ($pig) {
             $pig->status_id = $status->id;
