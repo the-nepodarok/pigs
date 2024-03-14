@@ -88,12 +88,15 @@ class PigsController extends ApiController
     public function actionGraduate(int $id, string $type): Pig
     {
         $pig = Pig::findOne($id);
-        $status = Status::find()->where(['value' => $type])->one();
-        $pig->graduation_date = date('Y-m-d');
 
         if ($pig) {
-            $pig->status_id = $status->id;
-            $pig->save(false);
+            $status = Status::find()->where(['value' => $type])->one();
+
+            if ($status) {
+                $pig->graduation_date = date('Y-m-d');
+                $pig->status_id = $status->id;
+                $pig->save(false);
+            }
         }
 
         return $pig;
