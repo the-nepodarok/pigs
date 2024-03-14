@@ -93,7 +93,7 @@ class PigsController extends ApiController
             $status = Status::find()->where(['value' => $type])->one();
 
             if ($status) {
-                $pig->graduation_date = date('Y-m-d');
+                $status->id == 1 ? $pig->graduation_date = null : $pig->graduation_date = date('Y-m-d');
                 $pig->status_id = $status->id;
                 $pig->save(false);
             }
