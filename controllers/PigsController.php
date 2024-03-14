@@ -85,12 +85,12 @@ class PigsController extends ApiController
         throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 
-    public function actionGraduate(int $id, string $type): Pig
+    public function actionGraduate(int $id, int $type_id): Pig
     {
         $pig = Pig::findOne($id);
 
         if ($pig) {
-            $status = Status::find()->where(['value' => $type])->one();
+            $status = Status::findOne($type_id);
 
             if ($status) {
                 $pig->graduation_date = in_array($status->id, Status::AVAILABLE_STATUSES) ? null : date('Y-m-d');
