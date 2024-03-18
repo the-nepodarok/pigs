@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "overseer".
@@ -39,6 +39,11 @@ class Overseer extends \yii\db\ActiveRecord
             'id' => 'ID',
             'overseer_name' => 'Куратор',
         ];
+    }
+
+    public function getPigs(): ActiveQuery
+    {
+        return $this->hasMany(Pig::class, ['overseer_id' => 'id']);
     }
 
     /**
