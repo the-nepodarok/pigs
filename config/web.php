@@ -102,6 +102,7 @@ $config = [
                     'controller' => ['overseer'],
                     'patterns' => [
                         'GET' => 'index',
+                        'GET <active:\w+>' => 'index',
                     ],
                 ],
                 [
