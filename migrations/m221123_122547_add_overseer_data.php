@@ -101,12 +101,6 @@ class m221123_122547_add_overseer_data extends Migration
             'overseer_name' => 'Елена, Домик Букли',
             'active' => false,
         ]);
-
-        $this->insert('overseer', [
-            'id' => 18,
-            'overseer_name' => 'Анна, Домик Пикселя',
-            'active' => false,
-        ]);
     }
 
     /**
