@@ -39,7 +39,7 @@ class PigsController extends ApiController
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionUpdate(int $id)
+    public function actionUpdate(int $id): Pig|array
     {
         $pig = Pig::findOne($id);
 

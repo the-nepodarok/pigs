@@ -105,6 +105,11 @@ class EntityWithPhotos extends ActiveRecord
         unlink($filename);
     }
 
+    /**
+     * Открепляет все фотографии модели
+     * @return void
+     */
+
     public function unlinkAllPhotos(): void
     {
         foreach ($this->photos as $photo) {
@@ -127,7 +132,11 @@ class EntityWithPhotos extends ActiveRecord
         return array_diff($current_photos, $old_photos);
     }
 
-
+    /**
+     * Меняет порядок загружаемых файлов
+     * @param $main_photo_index
+     * @return void
+     */
     public function changePhotoOrder($main_photo_index): void
     {
         $photos = $this->files;
@@ -138,6 +147,10 @@ class EntityWithPhotos extends ActiveRecord
         $this->files = $photos;
     }
 
+    /**
+     * Загружает новые фотографии
+     * @return void
+     */
     public function handlePhotos(): void
     {
         if ($this->files) {
