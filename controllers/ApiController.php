@@ -6,6 +6,7 @@ use app\models\EntityWithPhotos;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
 class ApiController extends \yii\rest\Controller
@@ -139,6 +140,14 @@ class ApiController extends \yii\rest\Controller
 
         if ($newEntry->validate()) {
             $newEntry->save(false);
+
+
+            $main_photo_index = $formData['main_photo_index'];
+
+            // меняет порядок файлов, если одна из фотографий выбрана главной
+            if (isset($main_photo_index) && intval($main_photo_index) !== 0) {
+                $newEntry->changePhotoOrder($main_photo_index);
+            }
 
             $newEntry->handlePhotos();
 

@@ -91,16 +91,16 @@ class EntityWithPhotos extends ActiveRecord
         $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo->image;
 
         try {
-            $photo->unlink($this->className, $this);
+            $photo->unlink($this->className, $this, true);
         } catch (\Exception $e) {
             error_log('Attempt to unlink file that does not exist');
         }
 
-        try {
-            $photo->delete();
-        } catch (\Throwable $e) {
-            error_log('Failed to delete record');
-        }
+//        try {
+//            $photo->delete();
+//        } catch (\Throwable $e) {
+//            error_log('Failed to delete record');
+//        }
 
         unlink($filename);
     }
@@ -125,6 +125,17 @@ class EntityWithPhotos extends ActiveRecord
 
         // Сравниваем пришедшие имена фотографий с теми, что уже имеются
         return array_diff($current_photos, $old_photos);
+    }
+
+
+    public function changePhotoOrder($main_photo_index): void
+    {
+        $photos = $this->files;
+
+        // changes order of marked as main file to be the first to add
+        $main = ArrayHelper::remove($photos, $main_photo_index);
+        array_unshift($photos, $main);
+        $this->files = $photos;
     }
 
     public function handlePhotos(): void

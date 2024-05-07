@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Article;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\models\Photo;
 use yii\web\BadRequestHttpException;
@@ -50,6 +51,14 @@ class ArticleController extends ApiController
                     $newArticle->linkPhoto($photo);
                 }
             } else {
+
+                $main_photo_index = $formData['main_photo_index'];
+
+                // меняет порядок файлов, если одна из фотографий выбрана главной
+                if (isset($main_photo_index) && intval($main_photo_index) !== 0) {
+                    $newArticle->changePhotoOrder($main_photo_index);
+                }
+
                 $newArticle->handlePhotos();
             }
 
@@ -96,13 +105,66 @@ class ArticleController extends ApiController
                     }
                 }
 
+                $article->refresh();
+
                 // Загружаем новые из формы
                 if ($article->type_id === 1) {
                     foreach ($photos as $photo) {
                         $article->linkPhoto($photo);
                     }
                 } else {
-                    $article->handlePhotos();
+
+                    // если одна из старых или новых фотографий должна стать главной
+                    if (isset($formData['main_photo_name']) || isset($formData['main_photo_index'])) {
+
+                        // получаем список текущих фотографий
+                        $current_photos = $article->photos;
+
+                        foreach ($current_photos as $current_photo) {
+                            // отвязываем их
+                            $article->unlink('photos', $current_photo, true);
+                        }
+
+                        // если нужно выбрать из новых фотографий
+                        if (isset($formData['main_photo_index'])) {
+                            // меняем порядок файлов, чтобы главная фотография была первой
+                            $article->changePhotoOrder($formData['main_photo_index']);
+
+                            // загружаем фотографии
+                            $article->handlePhotos();
+                        }
+
+                        // получаем массив из имён фотографий, что уже были в системе
+                        $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+
+                        // если главной фотографией должна быть одна из старых
+                        if (isset($formData['main_photo_name'])) {
+
+                            // находим её индекс в массиве
+                            $index = array_search ($formData['main_photo_name'], $current_photos);
+
+                            // переносим на первое место
+                            $main_photo = ArrayHelper::remove($current_photos, $index);
+                            array_unshift($current_photos, $main_photo);
+                        }
+
+                        // возвращаем в бд старые фотографии
+                        foreach ($current_photos as $photo) {
+                            $new_photo = new Photo();
+                            $new_photo->image = $photo;
+                            $new_photo->link('article', $article);
+                        }
+
+                        // если помимо главной из старых были переданые новые фото,
+                        // загрузить их
+                        if (isset($main_photo) && $article->files) {
+                            $article->handlePhotos();
+                        }
+
+                    } elseif ($article->files) {
+                        // если главной не была отмечена ни одна фотография, просто загрузить файлы
+                        $article->handlePhotos();
+                    }
                 }
 
                 $article->save(false);

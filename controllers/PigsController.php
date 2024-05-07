@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use app\models\Status;
+use yii\helpers\ArrayHelper;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\helpers\Json;
@@ -38,7 +39,7 @@ class PigsController extends ApiController
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionUpdate(int $id): Pig|array
+    public function actionUpdate(int $id)
     {
         $pig = Pig::findOne($id);
 
@@ -56,16 +57,68 @@ class PigsController extends ApiController
                     // Сравниваем фотографии с загруженными ранее
                     $difference = $pig->comparePhotos($old_photos);
 
-                    // Удаляем лишние фотографии
+                     // Удаляем лишние фотографии
                     foreach ($difference as $photo) {
                         $photo = Photo::findOne(['image' => $photo]);
                         $pig->unlinkPhoto($photo);
                     }
+
+                    // обновить модель со связями
+                    $pig->refresh();
                 }
 
-                $pig->handlePhotos();
+                // если одна из старых или новых фотографий должна стать главной
+                if (isset($formData['main_photo_name']) || isset($formData['main_photo_index'])) {
 
-                $pig->save(false);
+                    // получаем список текущих фотографий
+                    $current_photos = $pig->photos;
+
+                    foreach ($current_photos as $current_photo) {
+                        // отвязываем их
+                        $pig->unlink('photos', $current_photo, true);
+                    }
+
+                    // если нужно выбрать из новых фотографий
+                    if (isset($formData['main_photo_index'])) {
+                        // меняем порядок файлов, чтобы главная фотография была первой
+                        $pig->changePhotoOrder($formData['main_photo_index']);
+
+                        // загружаем фотографии
+                        $pig->handlePhotos();
+                    }
+
+                    // получаем массив из имён фотографий, что уже были в системе
+                    $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+
+                    // если главной фотографией должна быть одна из старых
+                    if (isset($formData['main_photo_name'])) {
+
+                        // находим её индекс в массиве
+                        $index = array_search ($formData['main_photo_name'], $current_photos);
+
+                        // переносим на первое место
+                        $main_photo = ArrayHelper::remove($current_photos, $index);
+                        array_unshift($current_photos, $main_photo);
+                    }
+
+                    // возвращаем в бд старые фотографии
+                    foreach ($current_photos as $photo) {
+                        $new_photo = new Photo();
+                        $new_photo->image = $photo;
+                        $new_photo->link('pig', $pig);
+                    }
+
+                    // если помимо главной из старых были переданые новые фото,
+                    // загрузить их
+                    if (isset($main_photo) && $pig->files) {
+                        $pig->handlePhotos();
+                    }
+
+                } elseif ($pig->files) {
+                    // если главной не была отмечена ни одна фотография, просто загрузить файлы
+                    $pig->handlePhotos();
+                }
+
                 $pig->refresh();
                 return $pig;
             }

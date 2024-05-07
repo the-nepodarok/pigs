@@ -71,6 +71,7 @@ class Photo extends \yii\db\ActiveRecord
             [['turn_in_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pig::class, 'targetAttribute' => ['turn_in_id' => 'id']],
             [['pig_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pig::class, 'targetAttribute' => ['pig_id' => 'id']],
             [['article_id'], 'exist', 'skipOnError' => true, 'targetClass' => Article::class, 'targetAttribute' => ['article_id' => 'id']],
+            [['image'], 'safe']
         ];
     }
 
