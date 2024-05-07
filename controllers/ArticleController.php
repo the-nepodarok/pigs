@@ -68,9 +68,6 @@ class ArticleController extends ApiController
         return $this->validationFailed($newArticle);
     }
 
-    /**
-     * @throws NotFoundHttpException
-     */
     public function actionUpdate(int $id): Article|array
     {
         $article = Article::findOne($id);
