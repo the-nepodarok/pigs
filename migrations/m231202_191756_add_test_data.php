@@ -23,8 +23,10 @@ class m231202_191756_add_test_data extends Migration
             'description' => 'Солнечный Принц',
             'age' => '???',
             'sex' => 'M',
+            'status_id' => 2,
             'overseer_id' => 16,
-            'city_id' => 1,
+            'datetime' => '2021-03-18',
+            'graduation_date' => '2021-05-10'
         ]);
 
         $this->insert('photos', [
