@@ -75,6 +75,9 @@ class ArticleController extends ApiController
             $article->load($formData, '');
 
             if ($formData and $article->validate()) {
+
+                $article->save();
+
                 $photos = [];
 
                 // если редактируется статья из полнотекстового редактора

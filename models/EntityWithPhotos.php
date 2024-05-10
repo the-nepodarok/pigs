@@ -199,7 +199,7 @@ class EntityWithPhotos extends ActiveRecord
         }
 
         // если нужно выбрать из новых фотографий
-        if (isset($mainPhotoIndex)) {
+        if ($mainPhotoIndex || $mainPhotoIndex === '0') {
 
             // если была отмечена первая, менять порядок не нужно
             if (intval($mainPhotoIndex) !== 0) {
@@ -221,9 +221,11 @@ class EntityWithPhotos extends ActiveRecord
             // находим её индекс в массиве
             $index = array_search($mainPhotoName, $currentPhotos);
 
-            // переносим на первое место
-            $mainPhoto = ArrayHelper::remove($currentPhotos, $index);
-            array_unshift($currentPhotos, $mainPhoto);
+            if ($index) {
+                // переносим на первое место
+                $mainPhoto = ArrayHelper::remove($currentPhotos, $index);
+                array_unshift($currentPhotos, $mainPhoto);
+            }
         }
 
         // возвращаем в бд старые фотографии
@@ -231,7 +233,7 @@ class EntityWithPhotos extends ActiveRecord
 
         // если помимо главной из старых были переданые новые фото,
         // загрузить их
-        if (isset($mainPhoto) && $this->files) {
+        if ($mainPhotoName && $this->files) {
             $this->handleNewPhotos();
         }
     }
