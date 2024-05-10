@@ -14,12 +14,12 @@ class ArticleController extends ApiController
 {
     public string $modelClass = Article::class;
 
-    public function actionIndex(int $type_id = null): array
+    public function actionIndex(int $type_id = null, int $all = 0): array
     {
         if ($type_id) {
             $articles = Article::find()->where("type_id = $type_id");
 
-            return $this->paginate($articles->orderBy('datetime DESC'));
+            return $all ? ['payload' => $articles->all()] : $this->paginate($articles->orderBy('datetime DESC'));
         }
 
         throw new BadRequestHttpException();
