@@ -52,11 +52,9 @@ class ArticleController extends ApiController
                 }
             } else {
 
-                $mainPhotoIndex = $formData['main_photo_index'];
-
                 // меняет порядок файлов, если одна из фотографий выбрана главной
-                if (isset($mainPhotoIndex) && intval($mainPhotoIndex) !== 0) {
-                    $newArticle->changePhotoOrder($mainPhotoIndex);
+                if (isset($formData['main_photo_index']) && intval($formData['main_photo_index']) !== 0) {
+                    $newArticle->changePhotoOrder($formData['main_photo_index']);
                 }
 
                 $newArticle->handleNewPhotos();
@@ -122,7 +120,7 @@ class ArticleController extends ApiController
 
                     } elseif ($article->files) {
                         // если главной не была отмечена ни одна фотография, просто загрузить файлы
-                        $article->handlePhotos();
+                        $article->handleNewPhotos();
                     }
                 }
 
