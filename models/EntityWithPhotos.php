@@ -164,7 +164,8 @@ class EntityWithPhotos extends ActiveRecord
     }
 
     /**
-     * @param array $old_photos массив из имён старых фотографий для создания связи
+     * Перепревязывает старые фотографии к модели
+     * @param array $old_photos
      * @return void
      */
     public function relinkOldPhotos(array $oldPhotos): void
@@ -177,11 +178,13 @@ class EntityWithPhotos extends ActiveRecord
     }
 
     /**
+     * Изменяет порядок загруженных и\или сохранённый
+     * фотографий для того, чтобы сделать отмечанную пользователем первой - т.е. главной
      * @param $mainPhotoName - название фотографии, если главной должна быть старая фотография
      * @param $mainPhotoIndex - индекс фотографии, если главной выбрана одна из новых
      * @return void
      */
-    public function rearrangePhotos($mainPhotoName, $mainPhotoIndex)
+    public function rearrangePhotos($mainPhotoName, $mainPhotoIndex): void
     {
         // получаем список текущих фотографий
         $currentPhotos = $this->photos;
@@ -198,6 +201,7 @@ class EntityWithPhotos extends ActiveRecord
         // если нужно выбрать из новых фотографий
         if (isset($mainPhotoIndex)) {
 
+            // если была отмечана первая, менять порядок не нужно
             if (intval($mainPhotoIndex) !== 0) {
 
                 // меняем порядок файлов, чтобы главная фотография была первой
