@@ -39,7 +39,7 @@ class PigsController extends ApiController
      * @throws NotFoundHttpException
      * @throws \Exception
      */
-    public function actionUpdate(int $id): Pig|array
+    public function actionUpdate(int $id)
     {
         $pig = Pig::findOne($id);
 
@@ -52,71 +52,32 @@ class PigsController extends ApiController
 
                 if (isset($formData['old_photos'])) {
                     // Получаем уже имеющиеся фотографии
-                    $old_photos = Json::decode($formData['old_photos']);
+                    $oldPhotos = Json::decode($formData['old_photos']);
 
                     // Сравниваем фотографии с загруженными ранее
-                    $difference = $pig->comparePhotos($old_photos);
+                    $difference = $pig->comparePhotos($oldPhotos);
 
-                     // Удаляем лишние фотографии
-                    foreach ($difference as $photo) {
-                        $photo = Photo::findOne(['image' => $photo]);
-                        $pig->unlinkPhoto($photo);
+                    if ($difference) {
+                         // Удаляем лишние фотографии
+                        foreach ($difference as $photo) {
+                            $photo = Photo::findOne(['image' => $photo]);
+                            $pig->unlinkPhoto($photo);
+                        }
+
+                        // обновить модель со связями
+                        $pig->refresh();
                     }
-
-                    // обновить модель со связями
-                    $pig->refresh();
                 }
 
                 // если одна из старых или новых фотографий должна стать главной
                 if (isset($formData['main_photo_name']) || isset($formData['main_photo_index'])) {
-
-                    // получаем список текущих фотографий
-                    $current_photos = $pig->photos;
-
-                    foreach ($current_photos as $current_photo) {
-                        // отвязываем их
-                        $pig->unlink('photos', $current_photo, true);
-                    }
-
-                    // если нужно выбрать из новых фотографий
-                    if (isset($formData['main_photo_index'])) {
-                        // меняем порядок файлов, чтобы главная фотография была первой
-                        $pig->changePhotoOrder($formData['main_photo_index']);
-
-                        // загружаем фотографии
-                        $pig->handlePhotos();
-                    }
-
-                    // получаем массив из имён фотографий, что уже были в системе
-                    $current_photos = ArrayHelper::getColumn($current_photos, 'image');
-
-                    // если главной фотографией должна быть одна из старых
-                    if (isset($formData['main_photo_name'])) {
-
-                        // находим её индекс в массиве
-                        $index = array_search ($formData['main_photo_name'], $current_photos);
-
-                        // переносим на первое место
-                        $main_photo = ArrayHelper::remove($current_photos, $index);
-                        array_unshift($current_photos, $main_photo);
-                    }
-
-                    // возвращаем в бд старые фотографии
-                    foreach ($current_photos as $photo) {
-                        $new_photo = new Photo();
-                        $new_photo->image = $photo;
-                        $new_photo->link('pig', $pig);
-                    }
-
-                    // если помимо главной из старых были переданые новые фото,
-                    // загрузить их
-                    if (isset($main_photo) && $pig->files) {
-                        $pig->handlePhotos();
-                    }
+                    $mainPhotoName = $formData['main_photo_name'] ?? false;
+                    $mainPhotoIndex = $formData['main_photo_index'] ?? false;
+                    $pig->rearrangePhotos($mainPhotoName, $mainPhotoIndex);
 
                 } elseif ($pig->files) {
                     // если главной не была отмечена ни одна фотография, просто загрузить файлы
-                    $pig->handlePhotos();
+                    $pig->handleNewPhotos();
                 }
 
                 $pig->refresh();

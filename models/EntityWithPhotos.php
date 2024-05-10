@@ -96,12 +96,6 @@ class EntityWithPhotos extends ActiveRecord
             error_log('Attempt to unlink file that does not exist');
         }
 
-//        try {
-//            $photo->delete();
-//        } catch (\Throwable $e) {
-//            error_log('Failed to delete record');
-//        }
-
         unlink($filename);
     }
 
@@ -119,30 +113,30 @@ class EntityWithPhotos extends ActiveRecord
 
     /**
      * Сравнивает массив пришедших фотографий с теми, что уже были загружены, и возвращает различие
-     * @param array $old_photos
+     * @param array $oldPhotos
      * @return array
      */
-    public function comparePhotos (array $old_photos): array
+    public function comparePhotos (array $oldPhotos): array
     {
         // Находим имеющиеся фотографии
-        $current_photos = $this->photos;
-        $current_photos = ArrayHelper::getColumn($current_photos, 'image');
+        $currentPhoto = $this->photos;
+        $currentPhoto = ArrayHelper::getColumn($currentPhoto, 'image');
 
         // Сравниваем пришедшие имена фотографий с теми, что уже имеются
-        return array_diff($current_photos, $old_photos);
+        return array_diff($currentPhoto, $oldPhotos);
     }
 
     /**
      * Меняет порядок загружаемых файлов
-     * @param $main_photo_index
+     * @param $mainPhotoIndex
      * @return void
      */
-    public function changePhotoOrder($main_photo_index): void
+    public function changePhotoOrder($mainPhotoIndex): void
     {
         $photos = $this->files;
 
         // changes order of marked as main file to be the first to add
-        $main = ArrayHelper::remove($photos, $main_photo_index);
+        $main = ArrayHelper::remove($photos, $mainPhotoIndex);
         array_unshift($photos, $main);
         $this->files = $photos;
     }
@@ -151,7 +145,7 @@ class EntityWithPhotos extends ActiveRecord
      * Загружает новые фотографии
      * @return void
      */
-    public function handlePhotos(): void
+    public function handleNewPhotos(): void
     {
         if ($this->files) {
             foreach ($this->files as $file) {
@@ -166,6 +160,75 @@ class EntityWithPhotos extends ActiveRecord
 
                 $this->linkPhoto($photo);
             }
+        }
+    }
+
+    /**
+     * @param array $old_photos массив из имён старых фотографий для создания связи
+     * @return void
+     */
+    public function relinkOldPhotos(array $oldPhotos): void
+    {
+        foreach ($oldPhotos as $photo) {
+            $newPhoto = new Photo();
+            $newPhoto->image = $photo;
+            $this->linkPhoto($newPhoto);
+        }
+    }
+
+    /**
+     * @param $mainPhotoName - название фотографии, если главной должна быть старая фотография
+     * @param $mainPhotoIndex - индекс фотографии, если главной выбрана одна из новых
+     * @return void
+     */
+    public function rearrangePhotos($mainPhotoName, $mainPhotoIndex)
+    {
+        // получаем список текущих фотографий
+        $currentPhotos = $this->photos;
+
+        foreach ($currentPhotos as $currentPhoto) {
+            // отвязываем их
+            try {
+                $this->unlink('photos', $currentPhoto, true);
+            } catch (\Exception $e) {
+                error_log('Attempt to unlink file that does not exist');
+            }
+        }
+
+        // если нужно выбрать из новых фотографий
+        if (isset($mainPhotoIndex)) {
+
+            if (intval($mainPhotoIndex) !== 0) {
+
+                // меняем порядок файлов, чтобы главная фотография была первой
+                $this->changePhotoOrder($mainPhotoIndex);
+            }
+
+            // загружаем новые фотографии
+            $this->handleNewPhotos();
+        }
+
+        // получаем массив из имён фотографий, что уже были в системе
+        $currentPhotos = ArrayHelper::getColumn($currentPhotos, 'image');
+
+        // если главной фотографией должна быть одна из старых
+        if ($mainPhotoName) {
+
+            // находим её индекс в массиве
+            $index = array_search($mainPhotoName, $currentPhotos);
+
+            // переносим на первое место
+            $mainPhoto = ArrayHelper::remove($currentPhotos, $index);
+            array_unshift($currentPhotos, $mainPhoto);
+        }
+
+        // возвращаем в бд старые фотографии
+        $this->relinkOldPhotos($currentPhotos);
+
+        // если помимо главной из старых были переданые новые фото,
+        // загрузить их
+        if (isset($mainPhoto) && $this->files) {
+            $this->handleNewPhotos();
         }
     }
 }
