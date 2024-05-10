@@ -141,11 +141,9 @@ class ApiController extends \yii\rest\Controller
         if ($newEntry->validate()) {
             $newEntry->save(false);
 
-            $mainPhotoIndex = $formData['main_photo_index'];
-
             // меняет порядок файлов, если одна из фотографий выбрана главной
-            if (isset($mainPhotoIndex) && intval($mainPhotoIndex) !== 0) {
-                $newEntry->changePhotoOrder($mainPhotoIndex);
+            if (isset($formData['main_photo_index']) && intval($formData['main_photo_index']) !== 0) {
+                $newEntry->changePhotoOrder($formData['main_photo_index']);
             }
 
             $newEntry->handleNewPhotos();
