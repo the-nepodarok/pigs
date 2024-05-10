@@ -30,9 +30,11 @@ class PigsController extends ApiController
             $order_param = 'graduation_date';
         } else {
             $pigs = $pigs->where(['status_id' => Status::AVAILABLE_STATUSES]);
+            // отсортировать по статусу, чтобы поместить свинок на карантине в конец списка
+            $order_param = 'status_id ASC, ' . $order_param;
         }
 
-        $pigs = $pigs->orderBy('status_id ASC, ' . $order_param . ' DESC');
+        $pigs = $pigs->orderBy($order_param . ' DESC');
 
         return $all ? ['payload' => $pigs->all()] : $this->paginate($pigs, 10);
     }
