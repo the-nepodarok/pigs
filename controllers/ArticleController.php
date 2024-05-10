@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Article;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\models\Photo;
 use yii\web\BadRequestHttpException;
@@ -50,7 +51,15 @@ class ArticleController extends ApiController
                     $newArticle->linkPhoto($photo);
                 }
             } else {
-                $newArticle->handlePhotos();
+
+                $mainPhotoIndex = $formData['main_photo_index'];
+
+                // меняет порядок файлов, если одна из фотографий выбрана главной
+                if (isset($mainPhotoIndex) && intval($mainPhotoIndex) !== 0) {
+                    $newArticle->changePhotoOrder($mainPhotoIndex);
+                }
+
+                $newArticle->handleNewPhotos();
             }
 
             return $newArticle;
@@ -59,9 +68,6 @@ class ArticleController extends ApiController
         return $this->validationFailed($newArticle);
     }
 
-    /**
-     * @throws NotFoundHttpException
-     */
     public function actionUpdate(int $id): Article|array
     {
         $article = Article::findOne($id);
@@ -81,18 +87,23 @@ class ArticleController extends ApiController
 
                 } else {
                     // Получаем уже имеющиеся фотографии
-                    $old_photos = Json::decode($formData['old_photos']);
+                    $oldPhotos = Json::decode($formData['old_photos']);
 
                     // Сравниваем фотографии с загруженными ранее
-                    $difference = $article->comparePhotos($old_photos);
-                }
+                    $difference = $article->comparePhotos($oldPhotos);
 
-                // Удаляем лишние фотографии
-                foreach ($difference as $filename) {
-                    try {
-                        $article->unlinkPhoto(Photo::find()->where(['image' => $filename])->one());
-                    } catch (\Exception $e) {
-                        error_log($e->getMessage());
+                    if ($difference) {
+
+                        // Удаляем лишние фотографии
+                        foreach ($difference as $filename) {
+                            try {
+                                $article->unlinkPhoto(Photo::find()->where(['image' => $filename])->one());
+                            } catch (\Exception $e) {
+                                error_log($e->getMessage());
+                            }
+                        }
+
+                        $article->refresh();
                     }
                 }
 
@@ -102,7 +113,17 @@ class ArticleController extends ApiController
                         $article->linkPhoto($photo);
                     }
                 } else {
-                    $article->handlePhotos();
+
+                    // если одна из старых или новых фотографий должна стать главной
+                    if (isset($formData['main_photo_name']) || isset($formData['main_photo_index'])) {
+                        $mainPhotoName = $formData['main_photo_name'] ?? false;
+                        $mainPhotoIndex = $formData['main_photo_index'] ?? false;
+                        $article->rearrangePhotos($mainPhotoName, $mainPhotoIndex);
+
+                    } elseif ($article->files) {
+                        // если главной не была отмечена ни одна фотография, просто загрузить файлы
+                        $article->handlePhotos();
+                    }
                 }
 
                 $article->save(false);

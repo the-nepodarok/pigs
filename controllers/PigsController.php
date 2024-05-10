@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use app\models\Status;
+use yii\helpers\ArrayHelper;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\helpers\Json;
@@ -51,21 +52,34 @@ class PigsController extends ApiController
 
                 if (isset($formData['old_photos'])) {
                     // Получаем уже имеющиеся фотографии
-                    $old_photos = Json::decode($formData['old_photos']);
+                    $oldPhotos = Json::decode($formData['old_photos']);
 
                     // Сравниваем фотографии с загруженными ранее
-                    $difference = $pig->comparePhotos($old_photos);
+                    $difference = $pig->comparePhotos($oldPhotos);
 
-                    // Удаляем лишние фотографии
-                    foreach ($difference as $photo) {
-                        $photo = Photo::findOne(['image' => $photo]);
-                        $pig->unlinkPhoto($photo);
+                    if ($difference) {
+                         // Удаляем лишние фотографии
+                        foreach ($difference as $photo) {
+                            $photo = Photo::findOne(['image' => $photo]);
+                            $pig->unlinkPhoto($photo);
+                        }
+
+                        // обновить модель со связями
+                        $pig->refresh();
                     }
                 }
 
-                $pig->handlePhotos();
+                // если одна из старых или новых фотографий должна стать главной
+                if (isset($formData['main_photo_name']) || isset($formData['main_photo_index'])) {
+                    $mainPhotoName = $formData['main_photo_name'] ?? false;
+                    $mainPhotoIndex = $formData['main_photo_index'] ?? false;
+                    $pig->rearrangePhotos($mainPhotoName, $mainPhotoIndex);
 
-                $pig->save(false);
+                } elseif ($pig->files) {
+                    // если главной не была отмечена ни одна фотография, просто загрузить файлы
+                    $pig->handleNewPhotos();
+                }
+
                 $pig->refresh();
                 return $pig;
             }
