@@ -55,7 +55,7 @@ class Pig extends EntityWithPhotos
     }
 
 
-    public function extraFields()
+    public function extraFields(): array
     {
         // Добавление полей с фотографиями, куратором и городом
         return ['photos', 'overseer', 'city', 'sex', 'status'];
@@ -84,9 +84,9 @@ class Pig extends EntityWithPhotos
     /**
      * Gets query for [[Photos]].
      *
-     * @return \yii\db\ActiveQuery|PhotoQuery
+     * @return ActiveQuery|PhotoQuery
      */
-    public function getPhotos(): ActiveQuery
+    public function getPhotos(): ActiveQuery|PhotoQuery
     {
         return $this->hasMany(Photo::class, ['pig_id' => 'id']);
     }
@@ -94,9 +94,9 @@ class Pig extends EntityWithPhotos
     /**
      * Gets query for [[Status]].
      *
-     * @return \yii\db\ActiveQuery|StatusQuery
+     * @return ActiveQuery|StatusQuery
      */
-    public function getStatus(): ActiveQuery
+    public function getStatus(): ActiveQuery|StatusQuery
     {
         return $this->hasOne(Status::class, ['id' => 'status_id']);
     }
@@ -104,9 +104,9 @@ class Pig extends EntityWithPhotos
     /**
      * Gets query for [[City]].
      *
-     * @return \yii\db\ActiveQuery|CityQuery
+     * @return ActiveQuery|CityQuery
      */
-    public function getCity(): ActiveQuery
+    public function getCity(): ActiveQuery|CityQuery
     {
         return $this->hasOne(City::class, ['id' => 'city_id']);
     }
@@ -114,9 +114,9 @@ class Pig extends EntityWithPhotos
     /**
      * Gets query for [[Overseer]].
      *
-     * @return \yii\db\ActiveQuery|OverseerQuery
+     * @return ActiveQuery|OverseerQuery
      */
-    public function getOverseer(): ActiveQuery
+    public function getOverseer(): ActiveQuery|OverseerQuery
     {
         return $this->hasOne(Overseer::class, ['id' => 'overseer_id']);
     }

@@ -20,7 +20,7 @@ class PigsController extends ApiController
         return [];
     }
 
-    public function actionIndex(string $graduated = ''): array
+    public function actionIndex(string $graduated = '', int $all = 0): array
     {
         $pigs = Pig::find();
         $order_param = 'datetime';
@@ -32,7 +32,9 @@ class PigsController extends ApiController
             $pigs = $pigs->where(['status_id' => Status::AVAILABLE_STATUSES]);
         }
 
-        return $this->paginate($pigs->orderBy($order_param . ' DESC'), 15);
+        $pigs = $pigs->orderBy('status_id ASC, ' . $order_param . ' DESC');
+
+        return $all ? ['payload' => $pigs->all()] : $this->paginate($pigs, 10);
     }
 
     /**
