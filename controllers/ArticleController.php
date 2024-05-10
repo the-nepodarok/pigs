@@ -51,7 +51,6 @@ class ArticleController extends ApiController
                     $newArticle->linkPhoto($photo);
                 }
             } else {
-
                 // меняет порядок файлов, если одна из фотографий выбрана главной
                 if (isset($formData['main_photo_index']) && intval($formData['main_photo_index']) !== 0) {
                     $newArticle->changePhotoOrder($formData['main_photo_index']);
