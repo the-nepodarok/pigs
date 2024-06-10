@@ -53,7 +53,11 @@ class PigsController extends ApiController
             $pig->load($formData, '');
 
             if ($formData and $pig->validate()) {
-                $pig->graduation_date = in_array($pig->status_id, Status::AVAILABLE_STATUSES) ? null : date('Y-m-d');
+                // если дата не указана, поставить текущую
+                if (!$pig->graduation_date) {
+                    $pig->graduation_date = in_array($pig->status_id, Status::AVAILABLE_STATUSES) ? null : date('Y-m-d');
+                }
+
                 $pig->save();
 
                 if (array_key_exists('old_photos', $formData)) {
