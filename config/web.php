@@ -112,6 +112,47 @@ $config = [
                         'GET' => 'index',
                     ],
                 ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['food' => 'food-category'],
+                    'patterns' => [
+                        'GET' => 'index',
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['queries' => 'food-query'],
+                    'patterns' => [
+                        'GET <filter:\w+>/<sort:\w+>' => 'index',
+                    ],
+                    'ruleConfig' => [
+                        'class' => 'yii\web\UrlRule',
+                        'defaults' => [
+                            'filter' => '',
+                            'sort' => '',
+                        ]
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['product' => 'food-product'],
+                    'patterns' => [
+                        'GET random' => 'randomize',
+                        'GET' => 'index',
+                        'GET <id>' => 'get',
+                        'POST' => 'create',
+                        'PATCH <id>' => 'update',
+                        'DELETE <id>' => 'delete',
+                        'GET search/<type:\d+>/<query:[\w+\s+]+>' => 'search',
+                    ],
+                    'ruleConfig' => [
+                        'class' => 'yii\web\UrlRule',
+                        'defaults' => [
+                            'type' => 0,
+                            'query' => '',
+                        ]
+                    ],
+                ],
             ],
         ],
     ],
