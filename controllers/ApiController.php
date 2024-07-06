@@ -3,10 +3,11 @@
 namespace app\controllers;
 
 use app\models\EntityWithPhotos;
+use app\models\FoodProduct;
+use app\models\FoodQuery;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 
 class ApiController extends \yii\rest\Controller
@@ -33,7 +34,7 @@ class ApiController extends \yii\rest\Controller
 
     protected function allowedActions(): array
     {
-        return ['get', 'index', 'randomize'];
+        return ['get', 'index', 'randomize', 'search'];
     }
 
     public function afterAction($action, $result)
@@ -116,7 +117,7 @@ class ApiController extends \yii\rest\Controller
      * @param int $id ID записи
      * @throws NotFoundHttpException Ошибка 404 при неверном ID
      */
-    public function actionGet(int $id): EntityWithPhotos|array|null
+    public function actionGet(int $id): EntityWithPhotos|FoodProduct|FoodQuery|array|null
     {
         $entry = $this->modelClass::findOne($id);
 
@@ -127,7 +128,7 @@ class ApiController extends \yii\rest\Controller
         }
     }
 
-    public function actionCreate(): EntityWithPhotos|array
+    public function actionCreate(): EntityWithPhotos|FoodProduct|array
     {
         $formData = \Yii::$app->request->post();
 
