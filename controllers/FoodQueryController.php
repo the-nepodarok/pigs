@@ -19,7 +19,7 @@ class FoodQueryController extends ApiController
         return ['index'];
     }
 
-    public function actionIndex(string $filter = '', string $sort = ''): array
+    public function actionIndex(string $filter = '', string $sort = 'date'): array
     {
         $queries = FoodQuery::find();
 
@@ -27,13 +27,13 @@ class FoodQueryController extends ApiController
             $queries->where(['failed' => true]);
         }
 
-        if ($sort === 'count') {
-            $queries->orderBy('count DESC');
-        } elseif ($sort === 'id') {
-            $queries->orderBy('id ASC');
-        } else {
-            $queries->orderBy('updated_at DESC');
-        }
+        $sortOption = match($sort) {
+            'count' => 'count DESC',
+            'id' => 'id ASC',
+            'date' => 'updated_at DESC',
+        };
+
+        $queries->orderBy($sortOption);
 
         return $this->paginate($queries, 2);
     }

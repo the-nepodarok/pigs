@@ -128,8 +128,8 @@ $config = [
                     'ruleConfig' => [
                         'class' => 'yii\web\UrlRule',
                         'defaults' => [
-                            'filter' => '',
-                            'sort' => '',
+                            'filter' => 'all',
+                            'sort' => 'date',
                         ]
                     ],
                 ],
