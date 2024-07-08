@@ -12,6 +12,8 @@ use yii\web\UploadedFile;
  */
 class EntityWithPhotos extends ActiveRecord
 {
+    const UPLOAD_DIRECTORY = 'img';
+
     public ?string $main_photo = null;
     public ?array $files = null;
     public string $className;
@@ -38,10 +40,12 @@ class EntityWithPhotos extends ActiveRecord
 
     public function beforeSave($insert): bool
     {
-        if ($insert)
-            $this->datetime = $this->datetime ?: date('Y-m-d');
-        else
-            $this->datetime = $this->datetime;
+        if (isset($this->datetime))
+            if ($insert)
+                $this->datetime = $this->datetime ?: date('Y-m-d');
+            else
+                $this->datetime = $this->datetime;
+
         return parent::beforeSave($insert);
     }
 
@@ -67,7 +71,7 @@ class EntityWithPhotos extends ActiveRecord
         // Добавление поля с главной фотографией
         $fields[] = 'main_photo';
 
-        $this->main_photo = $this->photos[0]['image'] ?? null;
+        $this->main_photo = $this->photo['image'] ?? $this->photos[0]['image'] ?? null;
 
         return $fields;
     }
@@ -88,7 +92,7 @@ class EntityWithPhotos extends ActiveRecord
      */
     public function unlinkPhoto (Photo $photo): void
     {
-        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo->image;
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . static::UPLOAD_DIRECTORY . DIRECTORY_SEPARATOR . $photo->image;
 
         try {
             $photo->unlink($this->className, $this, true);

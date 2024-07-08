@@ -24,6 +24,9 @@ use yii\web\UploadedFile;
 class Photo extends \yii\db\ActiveRecord
 {
 
+    const DEFAULT_UPLOAD_DIRECTORY = 'img';
+    const DEFAULT_FILENAME_PREFIX = 'domik-';
+
     /**
      * {@inheritdoc}
      */
@@ -95,11 +98,11 @@ class Photo extends \yii\db\ActiveRecord
      * @return void
      * @throws \Exception
      */
-    public function upload(UploadedFile $file): void
+    public function upload(UploadedFile $file, string $path = self::DEFAULT_UPLOAD_DIRECTORY, string $prefix = self::DEFAULT_FILENAME_PREFIX): void
     {
-        $name = uniqid('domik-');
+        $name = uniqid($prefix);
         $extension = ".$file->extension";
-        if ($file->saveAs('@webroot/img' . DIRECTORY_SEPARATOR . $name . $extension)) {
+        if ($file->saveAs(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . $path . DIRECTORY_SEPARATOR . $name . $extension)) {
             $this->image = $name . $extension;
         } else {
             throw new \Exception('Не удалось записать файл');

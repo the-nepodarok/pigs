@@ -2,15 +2,17 @@
 
 namespace app\controllers;
 
+use app\helpers\StringHelper;
 use app\models\FoodProduct;
 use app\models\FoodQuery;
+use app\models\Photo;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
 class FoodProductController extends ApiController
 {
     public string $modelClass = FoodProduct::class;
-    public string $sortOption = 'id';
+    public string $sortOption = 'title';
 
     public function actionCreate(): FoodProduct|array
     {
@@ -25,7 +27,7 @@ class FoodProductController extends ApiController
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
             if ($newProduct->file) {
-                $newProduct->uploadImage($newProduct->file);
+                $newProduct->attachPhoto($newProduct->file);
             }
 
             $newProduct->save(false);
@@ -50,11 +52,11 @@ class FoodProductController extends ApiController
 
             if ($product->file) {
 
-                if ($product->image) {
-                    $product->unlinkImage();
+                if (!empty($product->photo)) {
+                    $product->unlinkPhoto($product->photo);
                 }
 
-                $product->uploadImage($product->file);
+                $product->attachPhoto($product->file);
             }
 
             $product->save(false);
@@ -74,8 +76,8 @@ class FoodProductController extends ApiController
 
         if ($product) {
 
-            if ($product->image) {
-                $product->unlinkImage();
+            if (!empty($product->photo)) {
+                $product->unlinkPhoto($product->photo);
             }
 
             $product->delete();
@@ -97,6 +99,7 @@ class FoodProductController extends ApiController
 
         if ($query) {
 
+            $query = StringHelper::mb_ucfirst($query);
             $products = $products->andWhere(['OR',
                 ['LIKE', 'title', $query],
                 ['LIKE', 'synonyms', $query],
@@ -114,7 +117,7 @@ class FoodProductController extends ApiController
             $foodQuery->save(false);
         }
 
-        $products = $products->all();
+        $products = $products->orderBy($this->sortOption)->all();
 
         if ($query && !$products) {
             $foodQuery->failed = true;
