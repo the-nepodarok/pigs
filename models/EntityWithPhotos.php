@@ -161,8 +161,6 @@ class EntityWithPhotos extends ActiveRecord
                 } catch (\Exception $exception) {
                     $this->addError('files', $exception->getMessage());
                 }
-
-                $this->linkPhoto($photo);
             }
         }
     }
