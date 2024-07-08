@@ -85,10 +85,12 @@ class EntityWithPhotos extends ActiveRecord
     /**
      * Открепление фотографии от модели и удаление из файловой системы
      * @param $photo Photo
+     * @param $string
      */
-    public function unlinkPhoto (Photo $photo): void
+    public function unlinkPhoto (Photo $photo, string $folder = ''): void
     {
-        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . $photo->image;
+        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR .
+            ($folder ? $folder . DIRECTORY_SEPARATOR : '') . $photo->image;
 
         try {
             $photo->unlink($this->className, $this, true);
@@ -104,10 +106,10 @@ class EntityWithPhotos extends ActiveRecord
      * @return void
      */
 
-    public function unlinkAllPhotos(): void
+    public function unlinkAllPhotos(string $folder = ''): void
     {
         foreach ($this->photos as $photo) {
-            $this->unlinkPhoto($photo);
+            $this->unlinkPhoto($photo, $folder);
         }
     }
 
@@ -157,8 +159,6 @@ class EntityWithPhotos extends ActiveRecord
                 } catch (\Exception $exception) {
                     $this->addError('files', $exception->getMessage());
                 }
-
-                $this->linkPhoto($photo);
             }
         }
     }

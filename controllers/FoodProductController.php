@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\FoodProduct;
 use app\models\FoodQuery;
+use app\models\Photo;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
@@ -24,11 +25,13 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
-            if ($newProduct->file) {
-                $newProduct->uploadImage($newProduct->file);
-            }
-
             $newProduct->save(false);
+
+            if ($newProduct->file) {
+                $photo = new Photo();
+                $photo->upload($newProduct->file, 'info', 'info-');
+                $newProduct->linkPhoto($photo);
+            }
         } else {
             return $this->validationFailed($newProduct);
         }
@@ -48,16 +51,18 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
+            $product->save(false);
+
             if ($product->file) {
 
-                if ($product->image) {
-                    $product->unlinkImage();
+                if ($product->photos) {
+                    $product->unlinkAllPhotos('info');
                 }
 
-                $product->uploadImage($product->file);
+                $photo = new Photo();
+                $photo->upload($product->file, 'info', 'info-');
+                $product->linkPhoto($photo);
             }
-
-            $product->save(false);
         } else {
             return $this->validationFailed($product);
         }
@@ -74,8 +79,8 @@ class FoodProductController extends ApiController
 
         if ($product) {
 
-            if ($product->image) {
-                $product->unlinkImage();
+            if ($product->photos) {
+                $product->unlinkAllPhotos('info');
             }
 
             $product->delete();

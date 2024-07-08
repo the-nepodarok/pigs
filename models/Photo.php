@@ -92,14 +92,16 @@ class Photo extends \yii\db\ActiveRecord
     /**
      * Загрузка фотографии в файловую систему
      * @param UploadedFile $file
+     * @param string $folder
      * @return void
      * @throws \Exception
      */
-    public function upload(UploadedFile $file): void
+    public function upload(UploadedFile $file, string $folder = '', string $prefix = ''): void
     {
-        $name = uniqid('domik-');
+        $name = uniqid('domik-' . $prefix);
         $extension = ".$file->extension";
-        if ($file->saveAs('@webroot/img' . DIRECTORY_SEPARATOR . $name . $extension)) {
+        if ($file->saveAs(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' .
+            DIRECTORY_SEPARATOR . ($folder ? $folder . DIRECTORY_SEPARATOR : '') . $name . $extension)) {
             $this->image = $name . $extension;
         } else {
             throw new \Exception('Не удалось записать файл');
@@ -124,6 +126,16 @@ class Photo extends \yii\db\ActiveRecord
     public function getPig(): ActiveQuery
     {
         return $this->hasOne(Pig::class, ['id' => 'pig_id']);
+    }
+
+    /**
+     * Gets query for [[FoodProduct]].
+     *
+     * @return \yii\db\ActiveQuery|FoodProductQuery
+     */
+    public function getFoodProduct(): ActiveQuery
+    {
+        return $this->hasOne(FoodProduct::class, ['id' => 'food_product_id']);
     }
 
     /**
