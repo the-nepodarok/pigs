@@ -120,6 +120,16 @@ class Photo extends \yii\db\ActiveRecord
     }
 
     /**
+     * Gets query for [[FoodProduct]].
+     *
+     * @return ActiveQuery
+     */
+    public function getFoodProduct(): ActiveQuery
+    {
+        return $this->hasOne(FoodProduct::class, ['id' => 'food_product_id']);
+    }
+
+    /**
      * Gets query for [[Pig]].
      *
      * @return \yii\db\ActiveQuery|PigQuery
@@ -127,16 +137,6 @@ class Photo extends \yii\db\ActiveRecord
     public function getPig(): ActiveQuery
     {
         return $this->hasOne(Pig::class, ['id' => 'pig_id']);
-    }
-
-    /**
-     * Gets query for [[TurnIn]].
-     *
-     * @return \yii\db\ActiveQuery|PigQuery
-     */
-    public function getTurnIn(): ActiveQuery
-    {
-        return $this->hasOne(TurnIn::class, ['id' => 'turn_in_id']);
     }
 
     /**

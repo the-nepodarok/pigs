@@ -26,11 +26,13 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
-            if ($newProduct->file) {
-                $newProduct->attachPhoto($newProduct->file);
-            }
-
             $newProduct->save(false);
+
+            if ($newProduct->file) {
+                $photo = new Photo();
+                $photo->upload($newProduct->file, 'info', 'info-');
+                $newProduct->linkPhoto($photo);
+            }
         } else {
             return $this->validationFailed($newProduct);
         }
@@ -50,16 +52,18 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
+            $product->save(false);
+
             if ($product->file) {
 
-                if (!empty($product->photo)) {
-                    $product->unlinkPhoto($product->photo);
+                if ($product->photos) {
+                    $product->unlinkAllPhotos('info');
                 }
 
-                $product->attachPhoto($product->file);
+                $photo = new Photo();
+                $photo->upload($product->file);
+                $product->linkPhoto($photo);
             }
-
-            $product->save(false);
         } else {
             return $this->validationFailed($product);
         }
@@ -76,8 +80,8 @@ class FoodProductController extends ApiController
 
         if ($product) {
 
-            if (!empty($product->photo)) {
-                $product->unlinkPhoto($product->photo);
+            if ($product->photos) {
+                $product->unlinkAllPhotos();
             }
 
             $product->delete();
