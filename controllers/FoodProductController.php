@@ -30,7 +30,7 @@ class FoodProductController extends ApiController
 
             if ($newProduct->file) {
                 $photo = new Photo();
-                $photo->upload($newProduct->file, 'info', 'info-');
+                $photo->upload($newProduct->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
                 $newProduct->linkPhoto($photo);
             }
         } else {
@@ -57,11 +57,11 @@ class FoodProductController extends ApiController
             if ($product->file) {
 
                 if ($product->photos) {
-                    $product->unlinkAllPhotos('info');
+                    $product->unlinkAllPhotos();
                 }
 
                 $photo = new Photo();
-                $photo->upload($product->file);
+                $photo->upload($product->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
                 $product->linkPhoto($photo);
             }
         } else {
