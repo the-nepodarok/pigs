@@ -35,6 +35,6 @@ class FoodQueryController extends ApiController
 
         $queries->orderBy($sortOption);
 
-        return $this->paginate($queries, 2);
+        return $this->paginate($queries, 20);
     }
 }

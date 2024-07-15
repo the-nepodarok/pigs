@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m240630_130428_add_food_categories_data
+ * Class m240629_130428_add_food_categories_data
  */
-class m240630_130428_add_food_categories_data extends Migration
+class m240629_130428_add_food_categories_data extends Migration
 {
     /**
      * {@inheritdoc}
@@ -22,7 +22,7 @@ class m240630_130428_add_food_categories_data extends Migration
                 ['3', 'Ягоды'],
                 ['4', 'Веточный корм'],
                 ['5', 'Дикорастущие растения'],
-                ['6', 'Садовый растения'],
+                ['6', 'Садовые растения'],
                 ['7', 'Семена'],
         ]);
     }
@@ -32,7 +32,7 @@ class m240630_130428_add_food_categories_data extends Migration
      */
     public function safeDown()
     {
-//        echo "m240630_130428_add_food_categories_data cannot be reverted.\n";
+//        echo "m240629_130428_add_food_categories_data cannot be reverted.\n";
 
         $this->truncateTable('food_categories');
     }
@@ -46,7 +46,7 @@ class m240630_130428_add_food_categories_data extends Migration
 
     public function down()
     {
-        echo "m240630_130428_add_food_categories_data cannot be reverted.\n";
+        echo "m240629_130428_add_food_categories_data cannot be reverted.\n";
 
         return false;
     }

@@ -2,15 +2,17 @@
 
 namespace app\controllers;
 
+use app\helpers\StringHelper;
 use app\models\FoodProduct;
 use app\models\FoodQuery;
+use app\models\Photo;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
 class FoodProductController extends ApiController
 {
     public string $modelClass = FoodProduct::class;
-    public string $sortOption = 'id';
+    public string $sortOption = 'title';
 
     public function actionCreate(): FoodProduct|array
     {
@@ -24,11 +26,13 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
-            if ($newProduct->file) {
-                $newProduct->uploadImage($newProduct->file);
-            }
-
             $newProduct->save(false);
+
+            if ($newProduct->file) {
+                $photo = new Photo();
+                $photo->upload($newProduct->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
+                $newProduct->linkPhoto($photo);
+            }
         } else {
             return $this->validationFailed($newProduct);
         }
@@ -48,16 +52,18 @@ class FoodProductController extends ApiController
                 ($formData['desc'] ?? ' ') . '|' . ($formData['doses'] ?? ' ') . '|' . ($formData['allowed'] ?? ' ' ) .
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
+            $product->save(false);
+
             if ($product->file) {
 
-                if ($product->image) {
-                    $product->unlinkImage();
+                if ($product->photos) {
+                    $product->unlinkAllPhotos();
                 }
 
-                $product->uploadImage($product->file);
+                $photo = new Photo();
+                $photo->upload($product->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
+                $product->linkPhoto($photo);
             }
-
-            $product->save(false);
         } else {
             return $this->validationFailed($product);
         }
@@ -74,8 +80,8 @@ class FoodProductController extends ApiController
 
         if ($product) {
 
-            if ($product->image) {
-                $product->unlinkImage();
+            if ($product->photos) {
+                $product->unlinkAllPhotos();
             }
 
             $product->delete();
@@ -97,6 +103,7 @@ class FoodProductController extends ApiController
 
         if ($query) {
 
+            $query = StringHelper::mb_ucfirst($query);
             $products = $products->andWhere(['OR',
                 ['LIKE', 'title', $query],
                 ['LIKE', 'synonyms', $query],
@@ -114,7 +121,7 @@ class FoodProductController extends ApiController
             $foodQuery->save(false);
         }
 
-        $products = $products->all();
+        $products = $products->orderBy($this->sortOption)->all();
 
         if ($query && !$products) {
             $foodQuery->failed = true;

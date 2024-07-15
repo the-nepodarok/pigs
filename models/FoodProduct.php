@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii\db\ActiveQuery;
 use yii\web\UploadedFile;
 
 /**
@@ -17,8 +17,11 @@ use yii\web\UploadedFile;
  * @property FoodCategory $category
  * @property UploadedFile $file
  */
-class FoodProduct extends \yii\db\ActiveRecord
+class FoodProduct extends EntityWithPhotos
 {
+    const UPLOAD_DIRECTORY = 'img' . DIRECTORY_SEPARATOR . 'info';
+    const FILENAME_PREFIX = 'domik-info-';
+
     public $file = null;
 
     private const DESCRIPTION_FIELDS = ['desc', 'doses', 'allowed', 'restrictions', 'notes'];
@@ -34,15 +37,16 @@ class FoodProduct extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['title', 'unique', 'message' => '{attribute} уже существует!'],
             [['title', 'category_id'], 'required', 'message' => '{attribute} не может быть пустым'],
-            [['title', 'description', 'image', 'synonyms', 'synonyms'], 'string'],
+            [['title', 'description', 'synonyms', 'synonyms'], 'string'],
             [['category_id'], 'integer'],
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => FoodCategory::class, 'targetAttribute' => ['category_id' => 'id']],
-            [['title', 'image', 'synonyms'], 'safe'],
+            ['is_banned', 'boolean'],
+            [['title', 'synonyms', 'is_banned'], 'safe'],
             [['file'], 'image', 'maxFiles' => 1, 'maxSize' => 4e+6, 'skipOnEmpty' => true, 'extensions' => ['jpg', 'jpeg'],
                 'wrongExtension' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
                 'wrongMimeType' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
@@ -54,7 +58,7 @@ class FoodProduct extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => 'ID',
@@ -91,6 +95,15 @@ class FoodProduct extends \yii\db\ActiveRecord
         return $fields;
     }
 
+    /**
+     * Gets query for [[Photos]].
+     *
+     * @return ActiveQuery|PhotoQuery
+     */
+    public function getPhotos(): ActiveQuery|PhotoQuery
+    {
+        return $this->hasMany(Photo::class, ['food_product_id' => 'id']);
+    }
 
     /**
      * Gets query for [[Category]].
@@ -109,32 +122,5 @@ class FoodProduct extends \yii\db\ActiveRecord
     public static function find(): FoodProductQuery
     {
         return new FoodProductQuery(get_called_class());
-    }
-
-    /**
-     * Загрузка фотографии в файловую систему
-     * @param UploadedFile $file
-     * @return void
-     * @throws \Exception
-     */
-    public function uploadImage(UploadedFile $file): void
-    {
-        $name = uniqid('domik-info-');
-        $extension = ".$file->extension";
-        if ($file->saveAs('@webroot/img/info' . DIRECTORY_SEPARATOR . $name . $extension)) {
-            $this->image = $name . $extension;
-        } else {
-            throw new \Exception('Не удалось записать файл');
-        }
-    }
-
-    /**
-     * @param string $filename
-     * @return void
-     */
-    public function unlinkImage(): void
-    {
-        $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'info' . DIRECTORY_SEPARATOR . $this->image;
-        unlink($filename);
     }
 }

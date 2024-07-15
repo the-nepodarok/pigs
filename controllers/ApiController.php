@@ -16,7 +16,7 @@ class ApiController extends \yii\rest\Controller
     public string $modelClass;
     public string $sortOption = 'datetime';
 
-    public static function allowedDomains(): array
+    protected static function allowedDomains(): array
     {
         return [
             'http://localhost:5173',
@@ -25,7 +25,7 @@ class ApiController extends \yii\rest\Controller
         ];
     }
 
-    public static function allowedMethods(): array
+    protected static function allowedMethods(): array
     {
         return [
             'GET', 'POST', 'PATCH', 'DELETE',
