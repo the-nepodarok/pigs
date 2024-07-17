@@ -18,6 +18,7 @@ class m240629_100238_create_food_products_table extends Migration
             'description' => $this->text()->null(),
             'category_id' => $this->integer()->notNull(),
             'synonyms' => $this->text()->null(),
+            'is_banned' => $this->boolean()->defaultValue(false),
             'FOREIGN KEY (category_id) REFERENCES food_categories(id)',
         ]);
 
