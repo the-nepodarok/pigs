@@ -107,7 +107,12 @@ class FoodProductController extends ApiController
             $products = $products->andWhere(['OR',
                 ['LIKE', 'title', $query],
                 ['LIKE', 'synonyms', $query],
-                ['LIKE', 'food_categories.value', $query]]);
+                ['LIKE', 'food_categories.value', $query]])->orWhere(
+                    ['OR',
+                        ['LIKE', 'title', mb_strtolower($query)],
+                        ['LIKE', 'synonyms', mb_strtolower($query)],
+                        ['LIKE', 'food_categories.value', mb_strtolower($query)]]
+                );
 
             $foodQuery = FoodQuery::find()->where(['value' => $query])->one();
 
