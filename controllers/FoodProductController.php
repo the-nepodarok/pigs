@@ -128,8 +128,12 @@ class FoodProductController extends ApiController
 
         $products = $products->orderBy($this->sortOption)->all();
 
-        if ($query && !$products) {
-            $foodQuery->failed = true;
+        if ($query) {
+            if (!$products) {
+                $foodQuery->failed = true;
+            } else if ($foodQuery->failed) {
+                $foodQuery->failed = false;
+            }
             $foodQuery->save(false);
         }
 
