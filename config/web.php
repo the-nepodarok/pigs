@@ -66,6 +66,7 @@ $config = [
                     'extraPatterns' => [
                         'GET random/<number:\d+>' => 'randomize',
                         'GET random/<number:\d+>/<graduated:\w+>' => 'randomize',
+                        'GET count/<status_id:\d+>' => 'count',
                         'GET <id:\d+>' => 'get',
                         'GET <graduated:\w+>' => 'index',
                         'PATCH graduate/<id>/<type_id:\d+>' => 'graduate',

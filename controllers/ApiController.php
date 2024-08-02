@@ -34,7 +34,7 @@ class ApiController extends \yii\rest\Controller
 
     protected function allowedActions(): array
     {
-        return ['get', 'index', 'randomize', 'search'];
+        return ['get', 'index', 'randomize', 'search', 'count'];
     }
 
     public function afterAction($action, $result)

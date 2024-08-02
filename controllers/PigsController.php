@@ -143,4 +143,22 @@ class PigsController extends ApiController
 
         return ['payload' => $pigs->all(), 'count' => $pigs->count()];
     }
+
+    /**
+     * @param int $status_id
+     * @return int
+     * @throws \HttpInvalidParamException
+     */
+    public function actionCount(int $status_id): int
+    {
+        if (!$status_id) {
+            throw new \HttpInvalidParamException('Не передано значение');
+        }
+
+        $pigs_count = Pig::find()
+            ->where(['IN','status_id', $status_id])
+            ->count();
+
+        return $pigs_count;
+    }
 }
