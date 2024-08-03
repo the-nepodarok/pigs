@@ -155,10 +155,10 @@ class PigsController extends ApiController
             throw new \HttpInvalidParamException('Не передано значение');
         }
 
-        $pigs_count = Pig::find()
+        $pigsCount = Pig::find()
             ->where(['IN','status_id', $statusId])
             ->count();
 
-        return $pigs_count;
+        return $pigsCount;
     }
 }
