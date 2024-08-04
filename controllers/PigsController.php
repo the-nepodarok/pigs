@@ -109,12 +109,12 @@ class PigsController extends ApiController
         throw new MethodNotAllowedHttpException('Свинок удалять нельзя!');
     }
 
-    public function actionGraduate(int $id, int $type_id): Pig
+    public function actionGraduate(int $id, int $typeId): Pig
     {
         $pig = Pig::findOne($id);
 
         if ($pig) {
-            $status = Status::findOne($type_id);
+            $status = Status::findOne($typeId);
 
             if ($status) {
                 $pig->graduation_date = in_array($status->id, Status::AVAILABLE_STATUSES) ? null : date('Y-m-d');
@@ -142,5 +142,23 @@ class PigsController extends ApiController
             ->orderBy('RANDOM()')->limit($number);
 
         return ['payload' => $pigs->all(), 'count' => $pigs->count()];
+    }
+
+    /**
+     * @param int $statusId
+     * @return int
+     * @throws \HttpInvalidParamException
+     */
+    public function actionCount(int $statusId): int
+    {
+        if (!$statusId) {
+            throw new \HttpInvalidParamException('Не передано значение');
+        }
+
+        $pigsCount = Pig::find()
+            ->where(['IN','status_id', $statusId])
+            ->count();
+
+        return $pigsCount;
     }
 }
