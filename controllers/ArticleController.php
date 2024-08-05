@@ -3,16 +3,22 @@
 namespace app\controllers;
 
 use app\models\Article;
+use app\models\Tag;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\models\Photo;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\UploadedFile;
+use yii\web\Response;
 
 class ArticleController extends ApiController
 {
     public string $modelClass = Article::class;
+
+    public function allowedActions(): array
+    {
+        return ArrayHelper::merge(parent::allowedActions(), ['find-by-tag', 'create']);
+    }
 
     public function actionIndex(int $type_id = null, int $all = 0): array
     {
@@ -57,6 +63,14 @@ class ArticleController extends ApiController
                 }
 
                 $newArticle->handleNewPhotos();
+            }
+
+            if ($newArticle->hashtags) {
+                $hashtags = array_filter(explode(' ', $newArticle->hashtags));
+
+                foreach ($hashtags as $hashtag) {
+                    $newArticle->attachTag($hashtag);
+                }
             }
 
             return $newArticle;
@@ -126,6 +140,33 @@ class ArticleController extends ApiController
                     }
                 }
 
+                // обработка хэштегов
+                $currentHashtags = ArrayHelper::getColumn($article->tags, 'tag_value');
+
+                if (!empty($currentHashtags) && empty($article->hashtags)) {
+                    foreach ($currentHashtags as $hashtag) {
+                        $article->detachTag($hashtag);
+                    }
+                }
+
+                if ($article->hashtags) {
+                    $hashtags = array_filter(explode(' ', $article->hashtags));
+
+                    // если убрали что-то из старых тегов
+                    if ($diff = array_diff($currentHashtags, $hashtags)) {
+                        foreach ($diff as $hashtag) {
+                            $article->detachTag($hashtag);
+                        }
+                    }
+
+                    // если добавили что-то новое
+                    if ($diff = array_diff($hashtags, $currentHashtags)) {
+                        foreach ($diff as $hashtag) {
+                            $article->attachTag($hashtag);
+                        }
+                    }
+                }
+
                 $article->save(false);
                 $article->refresh();
 
@@ -136,5 +177,32 @@ class ArticleController extends ApiController
         }
 
         throw new NotFoundHttpException('Объект не найден');
+    }
+
+    public function actionDelete(int $id): Response
+    {
+        $article = Article::findOne($id);
+
+        if ($article) {
+            $article->unlinkAllPhotos();
+            $article->detachAllTags();
+            $article->delete();
+
+            \Yii::$app->response->statusCode = 204;
+
+            return \Yii::$app->response;
+        }
+
+        throw new NotFoundHttpException('Запись с таким ID не найдена');
+    }
+
+    /**
+     * @param string $tag
+     * @return array
+     */
+    public function actionFindByTag(string $tag): array
+    {
+        $articles = Article::find()->joinWith('tags')->where(['tags.tag_value' => $tag])->all();
+        return $articles;
     }
 }
