@@ -123,11 +123,11 @@ class EntityWithPhotos extends ActiveRecord
     public function comparePhotos (array $oldPhotos): array
     {
         // Находим имеющиеся фотографии
-        $currentPhoto = $this->photos;
-        $currentPhoto = ArrayHelper::getColumn($currentPhoto, 'image');
+        $currentPhotos = $this->photos;
+        $currentPhotos = ArrayHelper::getColumn($currentPhotos, 'image');
 
         // Сравниваем пришедшие имена фотографий с теми, что уже имеются
-        return array_diff($currentPhoto, $oldPhotos);
+        return array_diff($currentPhotos, $oldPhotos);
     }
 
     /**
