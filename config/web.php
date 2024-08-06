@@ -54,6 +54,7 @@ $config = [
                     'controller' => 'article',
                     'patterns' => [
                         'GET type/<type_id:[1-2]>' => 'index',
+                        'GET tag/<tag:\w+>' => 'find-by-tag',
                         'GET <id>' => 'get',
                         'POST type/<type_id:\d+>' => 'create',
                         'PATCH <id>' => 'update',

@@ -20,6 +20,7 @@ use yii\db\ActiveQuery;
  */
 class Article extends EntityWithPhotos
 {
+    public string $hashtags;
     /**
      * {@inheritdoc}
      */
@@ -37,8 +38,8 @@ class Article extends EntityWithPhotos
 
         return array_merge($rules, [
             [['type_id', 'title', 'text'], 'required', 'message' => 'Поле «{attribute}» обязательно к заполнению'],
-            [['title', 'text', 'author', 'origin_link', 'main_photo'], 'string'],
-            [['datetime', 'title', 'text', 'author', 'origin_link', 'main_photo'], 'safe'],
+            [['title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'string'],
+            [['datetime', 'title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'safe'],
             [['type_id'], 'integer'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => Type::class, 'targetAttribute' => ['type_id' => 'id']],
         ]);
@@ -62,6 +63,11 @@ class Article extends EntityWithPhotos
         ];
     }
 
+    public function extraFields()
+    {
+        return ['tags'];
+    }
+
     /**
      * Gets query for [[Photos]].
      *
@@ -80,6 +86,11 @@ class Article extends EntityWithPhotos
     public function getType(): ActiveQuery
     {
         return $this->hasOne(Type::class, ['id' => 'type_id']);
+    }
+
+    public function getTags(): ActiveQuery
+    {
+        return $this->hasMany(Tag::class, ['id' => 'tag_id'])->viaTable('article_tag', ['article_id' => 'id']);
     }
 
     /**
@@ -130,5 +141,42 @@ class Article extends EntityWithPhotos
         }
 
         return $photos;
+    }
+
+    /**
+     * @param string $hashtag
+     * @return void
+     */
+    public function attachTag(string $hashtag): void
+    {
+        $tag = Tag::findOne(['tag_value' => $hashtag]);
+
+        if (!$tag) {
+            $tag = new Tag();
+            $tag->tag_value = $hashtag;
+            $tag->save();
+        }
+
+        $this->link('tags', $tag);
+    }
+
+    /**
+     * @param string $hashtag
+     * @return void
+     */
+    public function detachTag(string $hashtag): void
+    {
+        $tag = Tag::findOne(['tag_value' => $hashtag]);
+        $this->unlink('tags', $tag, true);
+    }
+
+    /**
+     * @return void
+     */
+    public function detachAllTags(): void
+    {
+        foreach ($this->tags as $tag) {
+            $this->detachTag($tag);
+        }
     }
 }
