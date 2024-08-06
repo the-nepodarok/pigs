@@ -203,6 +203,6 @@ class ArticleController extends ApiController
     public function actionFindByTag(string $tag): array
     {
         $articles = Article::find()->joinWith('tags')->where(['tags.tag_value' => $tag])->all();
-        return $articles;
+        return ['payload' => $articles];
     }
 }
