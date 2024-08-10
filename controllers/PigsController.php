@@ -50,6 +50,8 @@ class PigsController extends ApiController
         if ($pig) {
             $formData = \Yii::$app->request->getBodyParams();
 
+            $formData['delivery'] = $formData['delivery'] ?? 0;
+
             $pig->load($formData, '');
 
             if ($formData and $pig->validate()) {
