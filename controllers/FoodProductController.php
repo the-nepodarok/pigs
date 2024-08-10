@@ -19,6 +19,7 @@ class FoodProductController extends ApiController
         $formData = \Yii::$app->request->post();
 
         $newProduct = new FoodProduct();
+
         $newProduct->load($formData, '');
 
         if ($newProduct->validate()) {
@@ -45,6 +46,8 @@ class FoodProductController extends ApiController
         $product = FoodProduct::findOne($id);
 
         $formData = \Yii::$app->request->post();
+        $formData['is_banned'] = $formData['is_banned'] ?? 0;
+
         $product->load($formData, '');
 
         if ($product->validate()) {
