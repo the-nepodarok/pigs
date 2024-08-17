@@ -53,6 +53,7 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'article',
                     'patterns' => [
+                        'GET randomize/<typeId:[1-2]>' => 'randomize',
                         'GET type/<type_id:[1-2]>' => 'index',
                         'GET tag/<tag:\w+>' => 'find-by-tag',
                         'GET <id>' => 'get',

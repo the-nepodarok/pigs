@@ -166,4 +166,24 @@ class ArticleController extends ApiController
         $articles = Article::find()->joinWith('tags')->where(['tags.tag_value' => $tag])->all();
         return ['payload' => $articles];
     }
+
+    /**
+     * @param int $typeId
+     * @return Article|array|null
+     */
+    public function actionRandomize(int $typeId): Article|array|null
+    {
+        $articles = Article::find()->select('articles.id, title, datetime')
+            ->where(['type_id' => $typeId]);
+
+        if ($typeId === 1) {
+            // для статей - случайные
+            $articles = $articles->orderBy('RANDOM()');
+        } else {
+            // для новостей - последние
+            $articles = $articles->orderBy('datetime DESC');
+        }
+
+        return ['payload' => $articles->limit(3)->all()];
+    }
 }
