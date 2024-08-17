@@ -168,18 +168,20 @@ class ArticleController extends ApiController
     }
 
     /**
-     * @param int $type
+     * @param int $typeId
      * @return Article|array|null
      */
     public function actionRandomize(int $typeId): Article|array|null
     {
         $articles = Article::find()->select('articles.id, title, datetime')
-            ->joinWith('photos', false)
             ->where(['type_id' => $typeId]);
-        if ($typeId === 2) {
-            $articles = $articles->orderBy('datetime DESC');
-        } else {
+
+        if ($typeId === 1) {
+            // для новостей
             $articles = $articles->orderBy('RANDOM()');
+        } else {
+            // для статей
+            $articles = $articles->orderBy('datetime DESC');
         }
 
         return ['payload' => $articles->limit(3)->all()];
