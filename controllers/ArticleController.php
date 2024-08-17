@@ -177,10 +177,10 @@ class ArticleController extends ApiController
             ->where(['type_id' => $typeId]);
 
         if ($typeId === 1) {
-            // для новостей
+            // для статей - случайные
             $articles = $articles->orderBy('RANDOM()');
         } else {
-            // для статей
+            // для новостей - последние
             $articles = $articles->orderBy('datetime DESC');
         }
 
