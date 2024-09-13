@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\services\CloudinaryService;
 use finfo;
 use Yii;
 use yii\db\ActiveQuery;
@@ -68,13 +69,13 @@ class Photo extends \yii\db\ActiveRecord
     {
         return [
             [['image'], 'required'],
-            [['image'], 'string'],
+            [['image', 'cloud'], 'string'],
             [['article_id', 'pig_id', 'turn_in_id'], 'integer'],
             [['image'], 'unique'],
             [['turn_in_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pig::class, 'targetAttribute' => ['turn_in_id' => 'id']],
             [['pig_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pig::class, 'targetAttribute' => ['pig_id' => 'id']],
             [['article_id'], 'exist', 'skipOnError' => true, 'targetClass' => Article::class, 'targetAttribute' => ['article_id' => 'id']],
-            [['image'], 'safe']
+            [['image', 'cloud'], 'safe']
         ];
     }
 
@@ -107,6 +108,26 @@ class Photo extends \yii\db\ActiveRecord
         } else {
             throw new \Exception('Не удалось записать файл');
         }
+    }
+
+    /**
+     * @param string $folder
+     * @return void
+     * @throws \Exception
+     */
+    public function uploadToCloud(string $folder = self::DEFAULT_UPLOAD_DIRECTORY): void
+    {
+        $cloudService = new CloudinaryService();
+        $this->cloud = $cloudService->store(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . $folder . DIRECTORY_SEPARATOR . $this->image);
+    }
+
+    /**
+     * @return void
+     */
+    public function deleteFromCloud(): void
+    {
+        $cloudService = new CloudinaryService();
+        $cloudService->delete($this->cloud);
     }
 
     /**
