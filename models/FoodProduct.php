@@ -47,11 +47,6 @@ class FoodProduct extends EntityWithPhotos
             [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => FoodCategory::class, 'targetAttribute' => ['category_id' => 'id']],
             ['is_banned', 'boolean'],
             [['title', 'synonyms', 'is_banned'], 'safe'],
-            [['file'], 'image', 'maxFiles' => 1, 'maxSize' => 4e+6, 'skipOnEmpty' => true, 'extensions' => ['jpg', 'jpeg'],
-                'wrongExtension' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
-                'wrongMimeType' => 'Неверный формат файла. Принимаются только картинки с расширением JPG',
-                'tooBig' => 'Файл слишком большой. Максимально допустимый размер: 4MB'
-            ],
         ];
     }
 

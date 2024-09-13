@@ -13,6 +13,7 @@ use yii\web\UploadedFile;
 class EntityWithPhotos extends ActiveRecord
 {
     const UPLOAD_DIRECTORY = 'img';
+    const DEFAULT_FILENAME_PREFIX = 'domik-';
 
     public ?string $main_photo = null;
     public ?array $files = null;
@@ -156,7 +157,7 @@ class EntityWithPhotos extends ActiveRecord
                 $photo = new Photo();
 
                 try {
-                    $photo->upload($file);
+                    $photo->upload($file, static::UPLOAD_DIRECTORY, static::DEFAULT_FILENAME_PREFIX);
                     $this->linkPhoto($photo);
                 } catch (\Exception $exception) {
                     $this->addError('files', $exception->getMessage());
