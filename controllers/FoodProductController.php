@@ -29,10 +29,8 @@ class FoodProductController extends ApiController
 
             $newProduct->save(false);
 
-            if ($newProduct->file) {
-                $photo = new Photo();
-                $photo->upload($newProduct->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
-                $newProduct->linkPhoto($photo);
+            if ($newProduct->files) {
+                $newProduct->handleNewPhotos();
             }
         } else {
             return $this->validationFailed($newProduct);
@@ -57,15 +55,13 @@ class FoodProductController extends ApiController
 
             $product->save(false);
 
-            if ($product->file) {
+            if ($product->files) {
 
                 if ($product->photos) {
                     $product->unlinkAllPhotos();
                 }
 
-                $photo = new Photo();
-                $photo->upload($product->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
-                $product->linkPhoto($photo);
+                $product->handleNewPhotos();
             }
         } else {
             return $this->validationFailed($product);
