@@ -56,6 +56,8 @@ class CloudinaryService
      */
     public function delete(string $publicId): void
     {
-        $this->cloudUploader->destroy($publicId);
+        $this->cloudUploader->destroy($publicId, [
+            'invalidate' => true,
+        ]);
     }
 }

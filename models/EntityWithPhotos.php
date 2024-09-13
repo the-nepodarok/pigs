@@ -13,6 +13,7 @@ use yii\web\UploadedFile;
 class EntityWithPhotos extends ActiveRecord
 {
     const UPLOAD_DIRECTORY = 'img';
+    const FILENAME_PREFIX = 'domik-';
 
     public ?string $main_photo = null;
     public ?array $files = null;
@@ -95,6 +96,9 @@ class EntityWithPhotos extends ActiveRecord
         $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . static::UPLOAD_DIRECTORY . DIRECTORY_SEPARATOR . $photo->image;
 
         try {
+            if ($photo->cloud) {
+                $photo->deleteFromCloud();
+            }
             $photo->unlink($this->className, $this, true);
         } catch (\Exception $e) {
             error_log('Attempt to unlink file that does not exist');
@@ -156,7 +160,8 @@ class EntityWithPhotos extends ActiveRecord
                 $photo = new Photo();
 
                 try {
-                    $photo->upload($file);
+                    $photo->upload($file, static::UPLOAD_DIRECTORY, static::FILENAME_PREFIX);
+                    $photo->uploadToCloud(static::UPLOAD_DIRECTORY);
                     $this->linkPhoto($photo);
                 } catch (\Exception $exception) {
                     $this->addError('files', $exception->getMessage());

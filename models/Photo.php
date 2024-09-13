@@ -115,7 +115,7 @@ class Photo extends \yii\db\ActiveRecord
      * @return void
      * @throws \Exception
      */
-    public function uploadToCloud(string $folder = self::DEFAULT_UPLOAD_DIRECTORY): void
+    public function uploadToCloud(string $folder): void
     {
         $cloudService = new CloudinaryService();
         $this->cloud = $cloudService->store(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . $folder . DIRECTORY_SEPARATOR . $this->image);
