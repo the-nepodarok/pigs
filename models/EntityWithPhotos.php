@@ -72,7 +72,7 @@ class EntityWithPhotos extends ActiveRecord
         // Добавление поля с главной фотографией
         $fields[] = 'main_photo';
 
-        $this->main_photo = $this->photo['image'] ?? $this->photos[0]['image'] ?? null;
+        $this->main_photo = $this->photo['cloud'] ?? $this->photos[0]['cloud'] ?? null;
 
         return $fields;
     }
