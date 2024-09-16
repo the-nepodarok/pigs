@@ -63,9 +63,9 @@ class Article extends EntityWithPhotos
         ];
     }
 
-    public function extraFields()
+    public function extraFields(): array
     {
-        return ['tags'];
+        return ['tags', 'photos'];
     }
 
     /**

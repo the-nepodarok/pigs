@@ -57,6 +57,8 @@ class Photo extends \yii\db\ActiveRecord
 
         $photo = new self();
         $photo->image = $filename;
+
+        $photo->uploadToCloud(self::DEFAULT_UPLOAD_DIRECTORY);
         $photo->save();
 
         return $photo;
