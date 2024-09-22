@@ -63,9 +63,9 @@ class Article extends EntityWithPhotos
         ];
     }
 
-    public function extraFields()
+    public function extraFields(): array
     {
-        return ['tags'];
+        return ['tags', 'photos'];
     }
 
     /**
@@ -122,6 +122,7 @@ class Article extends EntityWithPhotos
                 if (str_starts_with($src, 'data:image') and str_contains($src, 'base64')) {
                     try {
                         $photo = Photo::uploadFromBase64($src);
+                        $photo->uploadToCloud(Photo::DEFAULT_UPLOAD_DIRECTORY);
                         $src = $photo->image;
                     } catch (\Exception $e) {
                         $this->addError('files', $e->getMessage());

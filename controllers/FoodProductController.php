@@ -5,7 +5,7 @@ namespace app\controllers;
 use app\helpers\StringHelper;
 use app\models\FoodProduct;
 use app\models\FoodQuery;
-use app\models\Photo;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
@@ -14,6 +14,9 @@ class FoodProductController extends ApiController
     public string $modelClass = FoodProduct::class;
     public string $sortOption = 'title';
 
+    /**
+     * @throws Exception
+     */
     public function actionCreate(): FoodProduct|array
     {
         $formData = \Yii::$app->request->post();
@@ -29,10 +32,8 @@ class FoodProductController extends ApiController
 
             $newProduct->save(false);
 
-            if ($newProduct->file) {
-                $photo = new Photo();
-                $photo->upload($newProduct->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
-                $newProduct->linkPhoto($photo);
+            if ($newProduct->files) {
+                $newProduct->handleNewPhotos();
             }
         } else {
             return $this->validationFailed($newProduct);
@@ -57,15 +58,13 @@ class FoodProductController extends ApiController
 
             $product->save(false);
 
-            if ($product->file) {
+            if ($product->files) {
 
                 if ($product->photos) {
                     $product->unlinkAllPhotos();
                 }
 
-                $photo = new Photo();
-                $photo->upload($product->file, FoodProduct::UPLOAD_DIRECTORY, FoodProduct::FILENAME_PREFIX);
-                $product->linkPhoto($photo);
+                $product->handleNewPhotos();
             }
         } else {
             return $this->validationFailed($product);
