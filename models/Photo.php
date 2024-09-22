@@ -27,6 +27,7 @@ class Photo extends \yii\db\ActiveRecord
 
     const DEFAULT_UPLOAD_DIRECTORY = 'img';
     const DEFAULT_FILENAME_PREFIX = 'domik-';
+    private CloudinaryService $cloudService;
 
     /**
      * {@inheritdoc}
@@ -34,6 +35,12 @@ class Photo extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'photos';
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->cloudService = new CloudinaryService();
     }
 
     /**
@@ -57,8 +64,6 @@ class Photo extends \yii\db\ActiveRecord
 
         $photo = new self();
         $photo->image = $filename;
-
-        $photo->uploadToCloud(self::DEFAULT_UPLOAD_DIRECTORY);
         $photo->save();
 
         return $photo;
@@ -119,8 +124,7 @@ class Photo extends \yii\db\ActiveRecord
      */
     public function uploadToCloud(string $folder): void
     {
-        $cloudService = new CloudinaryService();
-        $this->cloud = $cloudService->store(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . $folder . DIRECTORY_SEPARATOR . $this->image);
+        $this->cloud = $this->cloudService->store(\Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . $folder . DIRECTORY_SEPARATOR . $this->image);
     }
 
     /**
@@ -128,8 +132,7 @@ class Photo extends \yii\db\ActiveRecord
      */
     public function deleteFromCloud(): void
     {
-        $cloudService = new CloudinaryService();
-        $cloudService->delete($this->cloud);
+        $this->cloudService->delete($this->cloud);
     }
 
     /**

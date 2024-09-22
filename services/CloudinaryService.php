@@ -37,16 +37,18 @@ class CloudinaryService
      * @param string $filepath
      * @return string|null
      * @throws ApiError
+     * @throws Exception
      */
-    public function upload(string $filepath): string|null
+    private function upload(string $filepath): string|null
     {
-        $response = $this->cloudUploader->upload($filepath, []);
-
+        $response = $this->cloudUploader->upload($filepath);
         $headers = $response->headers;
 
         if ($headers['Status'][0] === '200 OK') {
             $data = $response->getArrayCopy();
             return $data['public_id'];
+        } else {
+            throw new Exception('Unable to upload file, code - ' . $headers['Status'][0]);
         }
     }
 
