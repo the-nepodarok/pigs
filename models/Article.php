@@ -4,6 +4,8 @@ namespace app\models;
 
 use app\helpers\StringHelper;
 use yii\db\ActiveQuery;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 
 /**
  * This is the model class for table "articles".
@@ -14,6 +16,7 @@ use yii\db\ActiveQuery;
  * @property string|null $main_photo
  * @property string|null $datetime
  * @property int $type_id
+ * @property int $cover_id
  *
  * @property Photo[] $photos
  * @property Type $type
@@ -40,9 +43,17 @@ class Article extends EntityWithPhotos
             [['type_id', 'title', 'text'], 'required', 'message' => 'Поле «{attribute}» обязательно к заполнению'],
             [['title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'string'],
             [['datetime', 'title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'safe'],
-            [['type_id'], 'integer'],
+            [['type_id', 'cover_id'], 'integer'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => Type::class, 'targetAttribute' => ['type_id' => 'id']],
+            [['cover_id'], 'exist', 'skipOnError' => true, 'targetClass' => Photo::class, 'targetAttribute' => ['cover_id' => 'id']]
         ]);
+    }
+
+    public function fields(): array
+    {
+        $fields = parent::fields();
+        $this->main_photo = $this->cover['image'] ?? null;
+        return $fields;
     }
 
     /**
@@ -76,6 +87,15 @@ class Article extends EntityWithPhotos
     public function getPhotos(): ActiveQuery
     {
         return $this->hasMany(Photo::class, ['article_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Photo]].
+     * @return ActiveQuery
+     */
+    public function getCover(): ActiveQuery
+    {
+        return $this->hasOne(Photo::class, ['id' => 'cover_id']);
     }
 
     /**
@@ -141,6 +161,28 @@ class Article extends EntityWithPhotos
         }
 
         return $photos;
+    }
+
+    /**
+     * @throws Exception
+     * @throws StaleObjectException
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function setArticleCover(): void
+    {
+        if ($this->cover) {
+            $oldCover = $this->getCover()->one();
+            $filename = \Yii::getAlias('@webroot') . DIRECTORY_SEPARATOR . static::UPLOAD_DIRECTORY . DIRECTORY_SEPARATOR . $oldCover->image;
+            $this->unlink('cover', $oldCover);
+            $oldCover->delete();
+            unlink($filename);
+        }
+
+        $newPhoto = new Photo();
+        $newPhoto->upload($this->files[0]);
+        $newPhoto->save();
+        $this->link('cover', $newPhoto);
     }
 
     /**
