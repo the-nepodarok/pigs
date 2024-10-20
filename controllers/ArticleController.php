@@ -4,6 +4,8 @@ namespace app\controllers;
 
 use app\models\Article;
 use app\models\Tag;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use app\models\Photo;
@@ -31,6 +33,11 @@ class ArticleController extends ApiController
         throw new BadRequestHttpException();
     }
 
+    /**
+     * @throws Exception
+     * @throws StaleObjectException
+     * @throws BadRequestHttpException|\Throwable
+     */
     public function actionCreate(int $type_id = null): Article|array
     {
         if (!$type_id) {
@@ -50,6 +57,10 @@ class ArticleController extends ApiController
         if (empty($newArticle->errors) and $newArticle->validate()) {
             $newArticle->save(false);
 
+            if ($newArticle->files) {
+                $newArticle->setArticleCover();
+            }
+
             foreach ($photos as $photo) {
                 $newArticle->linkPhoto($photo);
             }
@@ -68,6 +79,11 @@ class ArticleController extends ApiController
         return $this->validationFailed($newArticle);
     }
 
+    /**
+     * @throws Exception
+     * @throws StaleObjectException
+     * @throws NotFoundHttpException|\Throwable
+     */
     public function actionUpdate(int $id): Article|array
     {
         $article = Article::findOne($id);
@@ -80,6 +96,10 @@ class ArticleController extends ApiController
             if ($formData and $article->validate()) {
 
                 $article->save();
+
+                if ($article->files) {
+                    $article->setArticleCover();
+                }
 
                 $photos = [];
 

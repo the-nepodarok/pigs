@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Handles the creation of table `{{%articles}}`.
  */
-class m231130_181555_create_articles_table extends Migration
+class m240802_181555_create_articles_table extends Migration
 {
     /**
      * {@inheritdoc}
@@ -20,7 +20,9 @@ class m231130_181555_create_articles_table extends Migration
             'origin_link' => $this->text(),
             'datetime' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
             'type_id' => $this->integer()->notNull(),
-            'FOREIGN KEY (type_id) REFERENCES types(id)'
+            'cover_id' => $this->integer(),
+            'FOREIGN KEY (type_id) REFERENCES types(id)',
+            'FOREIGN KEY (cover_id) REFERENCES photos(id)'
         ]);
     }
 
