@@ -51,9 +51,9 @@ class Article extends EntityWithPhotos
 
     public function fields(): array
     {
-        $fields = parent::fields();
         $this->main_photo = $this->cover['image'] ?? null;
-        return $fields;
+
+        return parent::fields();
     }
 
     /**

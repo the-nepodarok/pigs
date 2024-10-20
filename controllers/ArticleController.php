@@ -3,11 +3,9 @@
 namespace app\controllers;
 
 use app\models\Article;
-use app\models\Tag;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use app\models\Photo;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
