@@ -98,6 +98,7 @@ $config = [
                     'controller' => ['city'],
                     'patterns' => [
                         'GET' => 'index',
+                        'GET active' => 'active'
                     ],
                 ],
                 [
