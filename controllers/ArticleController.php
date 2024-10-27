@@ -191,7 +191,7 @@ class ArticleController extends ApiController
      */
     public function actionRandomize(int $typeId): Article|array|null
     {
-        $articles = Article::find()->select('articles.id, title, datetime')
+        $articles = Article::find()->select('articles.id, title, datetime, cover_id')
             ->where(['type_id' => $typeId]);
 
         if ($typeId === 1) {
