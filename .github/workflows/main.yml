@@ -15,8 +15,9 @@ jobs:
       - name: Deploy to Hosting
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
+          dry-run: true
           server: ${{ secrets.H_SERVER }}
           username: ${{ secrets.H_USER }}
           password: ${{ secrets.H_PASS }}
           server-dir: /www/domik-svinok.ru/
-          exclude: "[**/.git*/**, **/node_modules/**, /web/**, **/*.db]"
+          exclude: "[**/.git*/**, **/node_modules/**, **/web/**, **/*.db]"
