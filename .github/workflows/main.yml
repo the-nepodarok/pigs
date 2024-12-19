@@ -19,4 +19,4 @@ jobs:
           username: ${{ secrets.H_USER }}
           password: ${{ secrets.H_PASS }}
           server-dir: /www/domik-svinok.ru/
-          exclude: "[**/.git*/**, **/node_modules/**, ./web/**, **/*.db]"
+          exclude: "[**/.git*/**, **/node_modules/**, **/web/**, **/*.db]"
