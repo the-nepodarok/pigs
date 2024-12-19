@@ -6,4 +6,5 @@ protected/data/*.db
 themes/classic/views/
 /vendor/
 /runtime/
-/db/*.db
+/db/*
+/web/img/*
