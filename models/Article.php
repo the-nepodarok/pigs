@@ -41,7 +41,7 @@ class Article extends EntityWithPhotos
 
         return array_merge($rules, [
             [['type_id', 'title', 'text'], 'required', 'message' => 'Поле «{attribute}» обязательно к заполнению'],
-            [['title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'string'],
+            [['title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags', 'meta_title', 'meta_description'], 'string'],
             [['datetime', 'title', 'text', 'author', 'origin_link', 'main_photo', 'hashtags'], 'safe'],
             [['type_id', 'cover_id'], 'integer'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => Type::class, 'targetAttribute' => ['type_id' => 'id']],
