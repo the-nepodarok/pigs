@@ -181,7 +181,8 @@ class ArticleController extends ApiController
      */
     public function actionFindByTag(string $tag): array
     {
-        $articles = Article::find()->joinWith('tags')->where(['tags.tag_value' => $tag])->all();
+        $articles = Article::find()->joinWith('tags')->where(['tags.tag_value' => $tag])
+            ->orderBy('datetime DESC')->all();
         return ['payload' => $articles];
     }
 
