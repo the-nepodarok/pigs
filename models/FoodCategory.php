@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "food_categories".
@@ -46,11 +47,11 @@ class FoodCategory extends \yii\db\ActiveRecord
     /**
      * Gets query for [[FoodProducts]].
      *
-     * @return \yii\db\ActiveQuery|FoodProductQuery
+     * @return ActiveQuery|FoodProductQuery
      */
-    public function getFoodProducts(): \yii\db\ActiveQuery|FoodProductQuery
+    public function getFoodProducts(): ActiveQuery|FoodProductQuery
     {
-        return $this->hasMany(FoodProduct::class, ['category_id' => 'id']);
+        return $this->hasMany(FoodProduct::class, ['id' => 'product_id'])->viaTable('food_categories_products', ['category_id' => 'id']);
     }
 
     /**
