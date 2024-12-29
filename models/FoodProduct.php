@@ -3,6 +3,8 @@
 namespace app\models;
 
 use yii\db\ActiveQuery;
+use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\web\UploadedFile;
 
 /**
@@ -12,9 +14,9 @@ use yii\web\UploadedFile;
  * @property string $title
  * @property string|null $description
  * @property string|null $image
- * @property int $category_id
+ * @property array $types
  *
- * @property FoodCategory $category
+ * @property FoodCategory[] $categories
  * @property UploadedFile $file
  */
 class FoodProduct extends EntityWithPhotos
@@ -23,6 +25,7 @@ class FoodProduct extends EntityWithPhotos
     const FILENAME_PREFIX = 'domik-info-';
 
     public $file = null;
+    public $types = [];
 
     private const DESCRIPTION_FIELDS = ['desc', 'doses', 'allowed', 'restrictions', 'notes'];
 
@@ -41,12 +44,10 @@ class FoodProduct extends EntityWithPhotos
     {
         return [
             ['title', 'unique', 'message' => '{attribute} уже существует!'],
-            [['title', 'category_id'], 'required', 'message' => '{attribute} не может быть пустым'],
+            [['title', 'types'], 'required', 'message' => '{attribute} не может быть пустым'],
             [['title', 'description', 'synonyms', 'synonyms'], 'string'],
-            [['category_id'], 'integer'],
-            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => FoodCategory::class, 'targetAttribute' => ['category_id' => 'id']],
             ['is_banned', 'boolean'],
-            [['title', 'synonyms', 'is_banned'], 'safe'],
+            [['title', 'synonyms', 'is_banned', 'types'], 'safe'],
         ];
     }
 
@@ -59,7 +60,6 @@ class FoodProduct extends EntityWithPhotos
             'id' => 'ID',
             'title' => 'Наименование',
             'description' => 'Описание',
-            'category_id' => 'ID категории',
             'synonyms' => 'Синонимы',
         ];
     }
@@ -91,6 +91,14 @@ class FoodProduct extends EntityWithPhotos
     }
 
     /**
+     * @return string[]
+     */
+    public function extraFields(): array
+    {
+        return ['categories'];
+    }
+
+    /**
      * Gets query for [[Photos]].
      *
      * @return ActiveQuery|PhotoQuery
@@ -105,9 +113,9 @@ class FoodProduct extends EntityWithPhotos
      *
      * @return \yii\db\ActiveQuery|FoodCategoryQuery
      */
-    public function getCategory(): \yii\db\ActiveQuery|FoodCategoryQuery
+    public function getCategories(): \yii\db\ActiveQuery|FoodCategoryQuery
     {
-        return $this->hasOne(FoodCategory::class, ['id' => 'category_id']);
+        return $this->hasMany(FoodCategory::class, ['id' => 'category_id'])->viaTable('food_categories_products', ['product_id' => 'id']);
     }
 
     /**
@@ -117,5 +125,29 @@ class FoodProduct extends EntityWithPhotos
     public static function find(): FoodProductQuery
     {
         return new FoodProductQuery(get_called_class());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function handleCategories(): void
+    {
+        $this->unlinkAllCategories();
+
+        foreach ($this->types as $categoryId) {
+            $this->link('categories', FoodCategory::findOne(['id' => $categoryId]));
+        }
+    }
+
+    /**
+     * @throws Exception
+     * @throws StaleObjectException
+     */
+    public function unlinkAllCategories(): void
+    {
+        foreach ($this->categories as $category) {
+            $this->unlink('categories', $category, true);
+        }
     }
 }

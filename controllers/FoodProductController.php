@@ -5,7 +5,7 @@ namespace app\controllers;
 use app\helpers\StringHelper;
 use app\models\FoodProduct;
 use app\models\FoodQuery;
-use app\models\Photo;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\web\NotFoundHttpException;
 
@@ -14,6 +14,9 @@ class FoodProductController extends ApiController
     public string $modelClass = FoodProduct::class;
     public string $sortOption = 'title';
 
+    /**
+     * @throws Exception
+     */
     public function actionCreate(): FoodProduct|array
     {
         $formData = \Yii::$app->request->post();
@@ -28,6 +31,7 @@ class FoodProductController extends ApiController
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
             $newProduct->save(false);
+            $newProduct->handleCategories();
 
             if ($newProduct->files) {
                 $newProduct->handleNewPhotos();
@@ -39,6 +43,9 @@ class FoodProductController extends ApiController
         return $newProduct;
     }
 
+    /**
+     * @throws Exception
+     */
     public function actionUpdate(int $id): FoodProduct|array
     {
         $product = FoodProduct::findOne($id);
@@ -54,6 +61,7 @@ class FoodProductController extends ApiController
                     '|' . ($formData['restrictions'] ?? ' ') . '|' . ($formData['notes'] ?? ' ');
 
             $product->save(false);
+            $product->handleCategories();
 
             if ($product->files) {
 
@@ -83,6 +91,7 @@ class FoodProductController extends ApiController
                 $product->unlinkAllPhotos();
             }
 
+            $product->unlinkAllCategories();
             $product->delete();
 
             \Yii::$app->response->statusCode = 204;
@@ -94,7 +103,9 @@ class FoodProductController extends ApiController
 
     public function actionSearch(int $type, string $query)
     {
-        $products = FoodProduct::find()->leftJoin('food_categories', 'category_id = food_categories.id');
+        $products = FoodProduct::find()
+            ->leftJoin('food_categories_products', 'food_products.id = product_id')
+            ->leftJoin('food_categories', 'food_categories.id = food_categories_products.category_id');
 
         if ($type) {
             $products = $products->where(['food_categories.id' => $type]);
