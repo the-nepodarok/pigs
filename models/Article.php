@@ -219,7 +219,7 @@ class Article extends EntityWithPhotos
     public function detachAllTags(): void
     {
         foreach ($this->tags as $tag) {
-            $this->detachTag($tag);
+            $this->detachTag($tag->tag_value);
         }
     }
 }
