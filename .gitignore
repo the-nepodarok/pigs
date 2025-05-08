@@ -7,3 +7,4 @@ themes/classic/views/
 /vendor/
 /runtime/
 /db/*.db
+.env
