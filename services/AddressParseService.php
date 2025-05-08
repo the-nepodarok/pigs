@@ -65,13 +65,13 @@ class AddressParseService
                 if (empty($matches)) {
                     // поиск врача
                     $newString = trim(str_replace('•', '', $line));
-                    $matches = $this->matchVet($newString);
+                    $name = $this->matchVet($newString);
 
-                    if (empty($matches) || empty($matches['name'])) {
+                    if (!$name) {
                         continue;
                     }
 
-                    $this->handleVet($matches, $lastClinic, $feedbackStatusId);
+                    $this->handleVet($name, $lastClinic, $feedbackStatusId);
                 }
             } catch (\Error|\Exception $e) {
                 Yii::error($e->getMessage());
@@ -101,13 +101,13 @@ class AddressParseService
 
     /**
      * @param string $string
-     * @return array{name?: string}
+     * @return string|null
      */
-    private function matchVet(string $string): array
+    private function matchVet(string $string): string|null
     {
         $matches = [];
         preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯA-Z][а-яa-z]+\b)\s?(?=\()?/u", $string, $matches);
-        return $matches;
+        return isset($matches['name']) ? implode(' ', $matches['name']) : null;
     }
 
     /**
@@ -116,21 +116,36 @@ class AddressParseService
      */
     private function matchClinic(string $string): array
     {
+        $clinicData = [];
         $matches = [];
+
         preg_match("/(?<address>[\w\W]+(?<![^.][\W])\d{1,3}\w?\/?\d?),?\s?(?<title>(?<=клиника)?[\W\w\s][^(]+)\s?(?<info>\([\w\s]+\))?/u", $string, $matches);
-        return $matches;
+
+        if (isset($matches['address'])) {
+            $clinicData['address'] = $matches['address'];
+        }
+
+        if (isset($matches['title'])) {
+            $clinicData['title'] = $matches['title'];
+        }
+
+        if (isset($matches['info'])) {
+            $clinicData['info'] = $matches['info'];
+        }
+
+        return $clinicData;
     }
 
     /**
-     * @param array{name: string} $data
+     * @param string $name
      * @param Clinic|null $lastClinic
      * @param int|null $feedbackStatusId
      * @return void
      * @throws Exception
      */
-    private function handleVet(array $data, Clinic $lastClinic = null, int $feedbackStatusId = null): void
+    private function handleVet(string $name, ?Clinic $lastClinic = null, ?int $feedbackStatusId = null): void
     {
-        $name = implode(' ', $data['name']);
+
         $existingVet = Vet::findOne(['name' => $name]);
 
         if (!$existingVet) {
@@ -148,7 +163,7 @@ class AddressParseService
      * @throws Exception
      * @throws \yii\httpclient\Exception
      */
-    private function handleClinic(array $data, int $feedbackStatusId = null): Clinic|null
+    private function handleClinic(array $data, ?int $feedbackStatusId = null): Clinic|null
     {
         $fullAddress = $this->buildFullAddress($data);
         $clinic = Clinic::findOne(['address' => $fullAddress]);
@@ -186,7 +201,7 @@ class AddressParseService
      */
     private function buildFullAddress(array $matches): string
     {
-        return $matches['address'] . ($matches['title'] ? (' - ' . $matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
+        return $matches['address'] . (isset($matches['title']) ? (' - ' . $matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
     }
 
     /**
@@ -196,7 +211,7 @@ class AddressParseService
      * @return Clinic
      * @throws Exception
      */
-    private function createNewClinic(array $geodata, string $address, int $feedbackStatusId = null): Clinic
+    private function createNewClinic(array $geodata, string $address, ?int $feedbackStatusId = null): Clinic
     {
         $newClinic = new Clinic();
         $newClinic->address = $address;
@@ -218,7 +233,7 @@ class AddressParseService
      * @return Vet
      * @throws Exception
      */
-    private function createNewVet(string $name, Clinic $lastClinic = null, int $feedbackStatusId = null): Vet
+    private function createNewVet(string $name, Clinic $lastClinic = null, ?int $feedbackStatusId = null): Vet
     {
         $newVet = new Vet();
         $newVet->name = $name;
