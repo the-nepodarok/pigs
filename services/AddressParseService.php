@@ -59,6 +59,7 @@ class AddressParseService
 
                     if (!empty($matches)) {
                         $lastClinic = $this->handleClinic($matches, $feedbackStatusId);
+                        continue;
                     }
                 }
 
@@ -145,7 +146,6 @@ class AddressParseService
      */
     private function handleVet(string $name, ?Clinic $lastClinic = null, ?int $feedbackStatusId = null): void
     {
-
         $existingVet = Vet::findOne(['name' => $name]);
 
         if (!$existingVet) {
