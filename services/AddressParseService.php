@@ -119,7 +119,7 @@ class AddressParseService
         $clinicData = [];
         $matches = [];
 
-        preg_match("/(?<address>[\w\W]+(?<![^.][\W])\d{1,3}\w?\/?\d?),?\s?(?<title>(?<=клиника)?[\W\w\s][^(]+)\s?(?<info>\([\w\s]+\))?/u", $string, $matches);
+        preg_match("/(?<address>[г.]?[🚇\-\w\s,.]+(?<![^.][\W])\d{1,3}\w?[\/-]?\d?\w?),?\s?(?<title>(?<=клиника|«)?[\W\w\s][^(]+)\s?(?<info>\([\w.,\s]+\))?/u", $string, $matches);
 
         if (isset($matches['address'])) {
             $clinicData['address'] = $matches['address'];

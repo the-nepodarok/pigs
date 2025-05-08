@@ -139,6 +139,13 @@ $config = [
                 ],
                 [
                     'class' => 'yii\rest\UrlRule',
+                    'controller' => ['clinics' => 'clinic'],
+                    'patterns' => [
+                        'GET' => 'index',
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
                     'controller' => ['product' => 'food-product'],
                     'patterns' => [
                         'GET random' => 'randomize',

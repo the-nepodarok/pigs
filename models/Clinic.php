@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 class Clinic extends ActiveRecord
@@ -40,6 +41,11 @@ class Clinic extends ActiveRecord
         ];
     }
 
+    public function extraFields(): array
+    {
+        return ['vets'];
+    }
+
     /**
      * {@inheritdoc}
      * @return ClinicQuery the active query used by this AR class.
@@ -47,5 +53,15 @@ class Clinic extends ActiveRecord
     public static function find(): ClinicQuery
     {
         return new ClinicQuery(get_called_class());
+    }
+
+    /**
+     * Gets query for [[Photos]].
+     *
+     * @return ActiveQuery|ClinicQuery
+     */
+    public function getVets(): ActiveQuery|ClinicQuery
+    {
+        return $this->hasMany(Vet::class, ['clinic_id' => 'id']);
     }
 }
