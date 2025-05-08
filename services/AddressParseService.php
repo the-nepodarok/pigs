@@ -5,9 +5,9 @@ namespace app\services;
 use app\models\Clinic;
 use app\models\FeedbackStatus;
 use app\models\Vet;
-use app\services\GeocoderService;
 use Yii;
 use yii\db\Exception;
+use yii\helpers\ArrayHelper;
 
 class AddressParseService
 {
@@ -22,121 +22,146 @@ class AddressParseService
     protected string $metro = '🚇';
 
     protected GeocoderService $geocoderService;
+    protected FileReaderService $fileReaderService;
 
     public function __construct()
     {
         $this->geocoderService = new GeocoderService();
+        $this->fileReaderService = new FileReaderService();
     }
 
     /**
      * @param string $filename
      * @return void
-     * @throws Exception
-     * @throws \yii\httpclient\Exception
      */
     public function parse(string $filename): void
     {
         $lastClinic = null;
+        $feedbackStatuses = FeedbackStatus::find()->all();
+        $allStatuses = ArrayHelper::map($feedbackStatuses, 'value', 'id');
 
-        $file = fopen(Yii::$app->basePath . '/web/' . $filename, "r");
-
-        while (!feof($file)) {
-            $line = fgets($file);
-
+        foreach ($this->fileReaderService->readLine($filename) as $line) {
             $matches = [];
-            $feedbackStatus = null;
+            $feedbackStatusId = null;
             $currentStatus = $this->checkEntityFeedbackRating($line);
 
             if ($currentStatus) {
-                $feedbackStatus = FeedbackStatus::findOne(['value' => $currentStatus]);
+                $feedbackStatusId = $allStatuses[$currentStatus];
             }
 
-            // Поиск клиники
-            preg_match("/(?<address>[\w\W]+(?<![^.][\W])\d{1,3}\w?\/?\d?),?\s?(?<title>(?<=клиника)?[\W\w\s][^(]+)\s?(?<info>\([\w\s]+\))?/u", $line, $matches);
-
-            if (empty($matches) || str_contains($matches['address'], '+7')) {
-
-                // поиск врача
-                $newString = trim(str_replace('•', '', $line));
-                preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯA-Z][а-яa-z]+\b)\s?(?=\()?/u", $newString, $matches);
-
-                if (empty($matches) || empty($matches['name'])) {
-                    continue;
+            try {
+                if (!str_contains($line, '+7')) {
+                    // Поиск клиники
+                    $trimmedAddress = trim(str_replace(array_merge([$this->metro], array_keys($this->statuses)), '', $line));
+                    $trimmedAddress = str_replace('строение', 'стр.', $trimmedAddress);
+                    $matches = $this->matchClinic($trimmedAddress);
                 }
 
-                $this->handleVet($matches, $lastClinic, $feedbackStatus);
+                if (empty($matches)) {
+                    // поиск врача
+                    $newString = trim(str_replace('•', '', $line));
+                    $matches = $this->matchVet($newString);
 
-            } else {
-                $lastClinic = $this->handleClinic($matches, $feedbackStatus);
+                    if (empty($matches) || empty($matches['name'])) {
+                        continue;
+                    }
+
+                    $this->handleVet($matches, $lastClinic, $feedbackStatusId);
+
+                } else {
+                    $lastClinic = $this->handleClinic($matches, $feedbackStatusId);
+                }
+            } catch (\Error|\Exception $e) {
+                Yii::error($e->getMessage());
+                echo 'Error: ' . $e->getMessage();
+                continue;
             }
 
             echo $line;
         }
-
-        fclose($file);
     }
 
     /**
      * @param string $line
      * @return string|null
      */
-    protected function checkEntityFeedbackRating(string $line): string|null
+    private function checkEntityFeedbackRating(string $line): string|null
     {
         $currentStatus = null;
         foreach ($this->statuses as $status => $value) {
+            $currentStatus = mb_strstr($line, $status) ? $value : null;
             if ($currentStatus) {
                 break;
             }
-            $currentStatus = mb_strstr($line, $status) ? $value : null;
         }
         return $currentStatus;
     }
 
     /**
-     * @param array $data
+     * @param string $string
+     * @return array{name?: string}
+     */
+    private function matchVet(string $string): array
+    {
+        $matches = [];
+        preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯA-Z][а-яa-z]+\b)\s?(?=\()?/u", $string, $matches);
+        return $matches;
+    }
+
+    /**
+     * @param string $string
+     * @return array{address?: string, title?: string, info?:string}
+     */
+    private function matchClinic(string $string): array
+    {
+        $matches = [];
+        preg_match("/(?<address>[\w\W]+(?<![^.][\W])\d{1,3}\w?\/?\d?),?\s?(?<title>(?<=клиника)?[\W\w\s][^(]+)\s?(?<info>\([\w\s]+\))?/u", $string, $matches);
+        return $matches;
+    }
+
+    /**
+     * @param array{name: string} $data
      * @param Clinic|null $lastClinic
-     * @param FeedbackStatus|null $feedbackStatus
+     * @param int|null $feedbackStatusId
      * @return void
      * @throws Exception
      */
-    protected function handleVet(array $data, Clinic $lastClinic = null, FeedbackStatus $feedbackStatus = null): void
+    private function handleVet(array $data, Clinic $lastClinic = null, int $feedbackStatusId = null): void
     {
         $name = implode(' ', $data['name']);
         $existingVet = Vet::findOne(['name' => $name]);
 
         if (!$existingVet) {
-            $this->createNewVet($name, $lastClinic, $feedbackStatus);
-        } else if ($feedbackStatus && $existingVet->feedback_status_id !== $feedbackStatus->id) {
-            $existingVet->feedback_status_id = $feedbackStatus->id;
+            $this->createNewVet($name, $lastClinic, $feedbackStatusId);
+        } else if ($feedbackStatusId && $existingVet->feedback_status_id !== $feedbackStatusId) {
+            $existingVet->feedback_status_id = $feedbackStatusId;
             $existingVet->save();
         }
     }
 
     /**
-     * @param array $data
-     * @param FeedbackStatus|null $feedbackStatus
+     * @param array{address: string, title?: string, info?: string} $data
+     * @param int|null $feedbackStatusId
      * @return Clinic|null
      * @throws Exception
      * @throws \yii\httpclient\Exception
      */
-    protected function handleClinic(array $data, FeedbackStatus $feedbackStatus = null): Clinic|null
+    private function handleClinic(array $data, int $feedbackStatusId = null): Clinic|null
     {
-        $trimmedAddress = trim(str_replace(array_merge([$this->metro], array_keys($this->statuses)), '', $data['address']));
-        $trimmedAddress = str_replace('строение', 'стр.', $trimmedAddress);
-        $fullAddress = $this->buildFullAddress($trimmedAddress, $data);
+        $fullAddress = $this->buildFullAddress($data);
         $clinic = Clinic::findOne(['address' => $fullAddress]);
 
         if (!$clinic) {
-            $results = $this->getAddressCords(str_replace('м.', '', $trimmedAddress));
+            $results = $this->getAddressCoords(str_replace('м.', '', $data['address']));
 
             if (empty($results) || !isset($results['features']['0'])) {
                 Yii::error('Не найдена клиника по адресу - ' . $data['address']);
                 return null;
             }
 
-            $clinic = $this->createNewClinic($results['features']['0']['properties'], $fullAddress, $feedbackStatus);
-        } else if ($feedbackStatus && $clinic->feedback_status_id !== $feedbackStatus->id) {
-            $clinic->feedback_status_id = $feedbackStatus->id;
+            $clinic = $this->createNewClinic($results['features']['0']['properties'], $fullAddress, $feedbackStatusId);
+        } else if ($feedbackStatusId && $clinic->feedback_status_id !== $feedbackStatusId) {
+            $clinic->feedback_status_id = $feedbackStatusId;
             $clinic->save();
         }
 
@@ -145,40 +170,39 @@ class AddressParseService
 
     /**
      * @param string $address
-     * @return array
+     * @return array{features: array{properties?: array{lat: double, lon: double}}, query: array{text: string}}
      * @throws \yii\httpclient\Exception
      */
-    protected function getAddressCords(string $address): array
+    private function getAddressCoords(string $address): array
     {
         return $this->geocoderService->searchByString($address);
     }
 
     /**
-     * @param string $baseAddress
-     * @param array $matches
+     * @param array{address: string, title?: string, info?: string} $matches
      * @return string
      */
-    protected function buildFullAddress(string $baseAddress, array $matches): string
+    private function buildFullAddress(array $matches): string
     {
-        return $baseAddress . ($matches['title'] ? (' - ' . $matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
+        return $matches['address'] . ($matches['title'] ? (' - ' . $matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
     }
 
     /**
-     * @param array $geodata
+     * @param array{lon: double, lat: double} $geodata
      * @param string $address
-     * @param FeedbackStatus|null $feedbackStatus
+     * @param int|null $feedbackStatusId
      * @return Clinic
      * @throws Exception
      */
-    protected function createNewClinic(array $geodata, string $address, FeedbackStatus $feedbackStatus = null): Clinic
+    private function createNewClinic(array $geodata, string $address, int $feedbackStatusId = null): Clinic
     {
         $newClinic = new Clinic();
         $newClinic->address = $address;
         $newClinic->longitude = strval($geodata['lon']);
         $newClinic->latitude = strval($geodata['lat']);
 
-        if ($feedbackStatus) {
-            $newClinic->feedback_status_id = $feedbackStatus->id;
+        if ($feedbackStatusId) {
+            $newClinic->feedback_status_id = $feedbackStatusId;
         }
 
         $newClinic->save();
@@ -188,17 +212,17 @@ class AddressParseService
     /**
      * @param string $name
      * @param Clinic|null $lastClinic
-     * @param FeedbackStatus|null $feedbackStatus
+     * @param int|null $feedbackStatusId
      * @return Vet
      * @throws Exception
      */
-    protected function createNewVet(string $name, Clinic $lastClinic = null, FeedbackStatus $feedbackStatus = null): Vet
+    private function createNewVet(string $name, Clinic $lastClinic = null, int $feedbackStatusId = null): Vet
     {
         $newVet = new Vet();
         $newVet->name = $name;
 
-        if ($feedbackStatus) {
-            $newVet->feedback_status_id = $feedbackStatus->id;
+        if ($feedbackStatusId) {
+            $newVet->feedback_status_id = $feedbackStatusId;
         }
 
         if ($lastClinic) {

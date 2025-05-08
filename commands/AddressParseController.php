@@ -11,8 +11,6 @@ class AddressParseController extends Controller
     /**
      * @param string $filename
      * @return void
-     * @throws \yii\db\Exception
-     * @throws Exception
      */
     public function actionParse(string $filename): void
     {
