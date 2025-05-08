@@ -42,6 +42,7 @@ class AddressParseService
         $allStatuses = ArrayHelper::map($feedbackStatuses, 'value', 'id');
 
         foreach ($this->fileReaderService->getNextLine($filename) as $line) {
+            echo $line;
             $matches = [];
             $feedbackStatusId = null;
             $currentStatus = $this->checkEntityFeedbackRating($line);
@@ -79,8 +80,6 @@ class AddressParseService
                 echo 'Error: ' . $e->getMessage();
                 continue;
             }
-
-            echo $line;
         }
     }
 
