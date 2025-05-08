@@ -56,6 +56,7 @@ class AddressParseService
                     // Поиск клиники
                     $trimmedAddress = trim(str_replace(array_merge([$this->metro], array_keys($this->statuses)), '', $line));
                     $trimmedAddress = str_replace('строение', 'стр.', $trimmedAddress);
+                    $trimmedAddress = str_replace('корпус', 'к.', $trimmedAddress);
                     $matches = $this->matchClinic($trimmedAddress);
 
                     if (!empty($matches)) {
