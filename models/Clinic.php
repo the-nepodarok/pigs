@@ -20,9 +20,9 @@ class Clinic extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['address'], 'string'],
+            [['address', 'title'], 'string'],
             [['latitude', 'longitude'], 'double'],
-            [['address', 'latitude', 'longitude', 'feedback_status_id'], 'safe'],
+            [['address', 'title', 'latitude', 'longitude', 'feedback_status_id'], 'safe'],
             [['feedback_status_id'], 'exist', 'skipOnError' => true, 'targetClass' => FeedbackStatus::class, 'targetAttribute' => ['feedback_status_id' => 'id']]
         ];
     }

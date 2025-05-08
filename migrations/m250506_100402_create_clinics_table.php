@@ -15,6 +15,7 @@ class m250506_100402_create_clinics_table extends Migration
         $this->createTable('{{%clinics}}', [
             'id' => $this->primaryKey(),
             'address' => $this->string()->notNull(),
+            'title' => $this->string(),
             'latitude' => $this->float(),
             'longitude' => $this->float(),
             'feedback_status_id' => $this->integer(),

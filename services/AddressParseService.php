@@ -165,8 +165,14 @@ class AddressParseService
      */
     private function handleClinic(array $data, ?int $feedbackStatusId = null): Clinic|null
     {
-        $fullAddress = $this->buildFullAddress($data);
-        $clinic = Clinic::findOne(['address' => $fullAddress]);
+        $title = $this->buildFullTitle($data);
+        $query = Clinic::find()->where(['address' => $data['address']]);
+
+        if ($title) {
+            $query->andWhere(['title' => $title]);
+        }
+
+        $clinic = $query->one();
 
         if (!$clinic) {
             $results = $this->getAddressCoords(str_replace('м.', '', $data['address']));
@@ -176,7 +182,7 @@ class AddressParseService
                 return null;
             }
 
-            $clinic = $this->createNewClinic($results['features']['0']['properties'], $fullAddress, $feedbackStatusId);
+            $clinic = $this->createNewClinic($results['features']['0']['properties'], $data['address'], $title, $feedbackStatusId);
         } else if ($feedbackStatusId && $clinic->feedback_status_id !== $feedbackStatusId) {
             $clinic->feedback_status_id = $feedbackStatusId;
             $clinic->save();
@@ -199,22 +205,24 @@ class AddressParseService
      * @param array{address: string, title?: string, info?: string} $matches
      * @return string
      */
-    private function buildFullAddress(array $matches): string
+    private function buildFullTitle(array $matches): string
     {
-        return $matches['address'] . (isset($matches['title']) ? (' - ' . $matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
+        return (isset($matches['title']) ? ($matches['title']) : '') . (isset($matches['info']) ? (' ' . $matches['info']) : '');
     }
 
     /**
      * @param array{lon: double, lat: double} $geodata
      * @param string $address
+     * @param string|null $title
      * @param int|null $feedbackStatusId
      * @return Clinic
      * @throws Exception
      */
-    private function createNewClinic(array $geodata, string $address, ?int $feedbackStatusId = null): Clinic
+    private function createNewClinic(array $geodata, string $address, ?string $title = '', ?int $feedbackStatusId = null): Clinic
     {
         $newClinic = new Clinic();
         $newClinic->address = $address;
+        $newClinic->title = $title;
         $newClinic->longitude = strval($geodata['lon']);
         $newClinic->latitude = strval($geodata['lat']);
 
