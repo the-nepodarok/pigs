@@ -2,6 +2,7 @@
 
 namespace app\services;
 
+use Yii;
 use yii\httpclient\Client;
 use yii\httpclient\Exception;
 
@@ -29,7 +30,7 @@ class GeocoderService
         if ($response->isOk) {
             $results = $response->data;
         } else {
-            error_log($response->content);
+            Yii::error('Geocoder error: ' . $response->content);
         }
 
         return $results;
