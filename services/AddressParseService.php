@@ -2,6 +2,7 @@
 
 namespace app\services;
 
+use app\helpers\FileReaderHelper;
 use app\models\Clinic;
 use app\models\FeedbackStatus;
 use app\models\Vet;
@@ -22,12 +23,12 @@ class AddressParseService
     protected string $metro = '🚇';
 
     protected GeocoderService $geocoderService;
-    protected FileReaderService $fileReaderService;
+    protected FileReaderHelper $fileReaderService;
 
     public function __construct()
     {
         $this->geocoderService = new GeocoderService();
-        $this->fileReaderService = new FileReaderService();
+        $this->fileReaderService = new FileReaderHelper();
     }
 
     /**
@@ -40,7 +41,7 @@ class AddressParseService
         $feedbackStatuses = FeedbackStatus::find()->all();
         $allStatuses = ArrayHelper::map($feedbackStatuses, 'value', 'id');
 
-        foreach ($this->fileReaderService->readLine($filename) as $line) {
+        foreach ($this->fileReaderService->getNextLine($filename) as $line) {
             $matches = [];
             $feedbackStatusId = null;
             $currentStatus = $this->checkEntityFeedbackRating($line);
@@ -55,6 +56,10 @@ class AddressParseService
                     $trimmedAddress = trim(str_replace(array_merge([$this->metro], array_keys($this->statuses)), '', $line));
                     $trimmedAddress = str_replace('строение', 'стр.', $trimmedAddress);
                     $matches = $this->matchClinic($trimmedAddress);
+
+                    if (!empty($matches)) {
+                        $lastClinic = $this->handleClinic($matches, $feedbackStatusId);
+                    }
                 }
 
                 if (empty($matches)) {
@@ -67,9 +72,6 @@ class AddressParseService
                     }
 
                     $this->handleVet($matches, $lastClinic, $feedbackStatusId);
-
-                } else {
-                    $lastClinic = $this->handleClinic($matches, $feedbackStatusId);
                 }
             } catch (\Error|\Exception $e) {
                 Yii::error($e->getMessage());

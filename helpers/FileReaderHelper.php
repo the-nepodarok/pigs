@@ -1,16 +1,16 @@
 <?php
 
-namespace app\services;
+namespace app\helpers;
 
 use Yii;
 
-class FileReaderService
+class FileReaderHelper
 {
     /**
      * @param string $path
      * @return \Generator|int
      */
-    public function readLine(string $path): int|\Generator
+    public function getNextLine(string $path): int|\Generator
     {
         $file = fopen(Yii::$app->basePath . '/web/' . $path, "r");
 
