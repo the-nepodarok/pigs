@@ -165,6 +165,7 @@ class AddressParseService
     private function handleClinic(array $data, ?int $feedbackStatusId = null): Clinic|null
     {
         $title = $this->buildFullTitle($data);
+        $title = preg_replace('/\s+/', ' ', $title);
         $query = Clinic::find()->where(['address' => $data['address']]);
 
         if ($title) {
