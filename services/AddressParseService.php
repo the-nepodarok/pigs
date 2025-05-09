@@ -54,7 +54,7 @@ class AddressParseService
             try {
                 if (!str_contains($line, '+7')) {
                     // Поиск клиники
-                    $trimmedAddress = trim(str_replace(array_merge([$this->metro], array_keys($this->statuses)), '', $line));
+                    $trimmedAddress = trim(str_replace(array_merge([$this->metro, 'г.'], array_keys($this->statuses)), '', $line));
                     $trimmedAddress = str_replace('строение', 'стр.', $trimmedAddress);
                     $trimmedAddress = str_replace('корпус', 'к.', $trimmedAddress);
                     $matches = $this->matchClinic($trimmedAddress);
