@@ -176,7 +176,12 @@ class AddressParseService
         $clinic = $query->one();
 
         if (!$clinic) {
-            $results = $this->getAddressCoords(str_replace('м.', '', $data['address']));
+            $searchAddress = preg_replace('/,\s{0,5}м.\s?\w+\s?\w+?,/u', '', $data['address']);
+            $searchAddress = preg_replace('/к. \d+/u', '', $searchAddress);
+            $searchAddress = preg_replace('/стр. \d+/u', '', $searchAddress);
+            $searchAddress = str_replace(['д.', 'б-р', 'корп.', 'пер.'], '', $searchAddress);
+            $searchAddress = preg_replace('/\s+/u', ' ', $searchAddress);
+            $results = $this->getAddressCoords($searchAddress);
 
             if (empty($results) || !isset($results['features']['0'])) {
                 Yii::error('Не найдена клиника по адресу - ' . $data['address']);
