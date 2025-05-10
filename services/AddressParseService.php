@@ -107,7 +107,7 @@ class AddressParseService
     private function matchVet(string $string): string|null
     {
         $matches = [];
-        preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯA-Z][а-яa-z]+\b)\s?(?=\()?/u", $string, $matches);
+        preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯЁA-Z][а-яёa-z]+\b)\s?(?=\()?/u", $string, $matches);
         return isset($matches['name']) ? implode(' ', $matches['name']) : null;
     }
 
@@ -176,7 +176,15 @@ class AddressParseService
         $clinic = $query->one();
 
         if (!$clinic) {
-            $results = $this->getAddressCoords(str_replace('м.', '', $data['address']));
+            $searchAddress = preg_replace('/\bм\.\s?[\w\s-]+\b,/u', '', $data['address']);
+            $searchAddress = preg_replace('/[шШ]\./u', 'шоссе', $searchAddress);
+            $searchAddress = preg_replace('/обл\./u', 'область', $searchAddress);
+            $searchAddress = preg_replace('/\s{0,5}[бБ]ульвар\s?/u', '', $searchAddress);
+            $searchAddress = preg_replace('/к\. \d+/u', '', $searchAddress);
+            $searchAddress = preg_replace('/стр\. \d+/u', '', $searchAddress);
+            $searchAddress = str_replace(['д.', 'б-р', 'корп.', 'пер.', 'мкр.'], '', $searchAddress);
+            $searchAddress = preg_replace('/\s+/u', ' ', $searchAddress);
+            $results = $this->getAddressCoords($searchAddress);
 
             if (empty($results) || !isset($results['features']['0'])) {
                 Yii::error('Не найдена клиника по адресу - ' . $data['address']);
