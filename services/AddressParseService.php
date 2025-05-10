@@ -176,10 +176,10 @@ class AddressParseService
         $clinic = $query->one();
 
         if (!$clinic) {
-            $searchAddress = preg_replace('/,\s{0,5}м.\s?\w+\s?\w+?,/u', '', $data['address']);
-            $searchAddress = preg_replace('/,\s{0,5}[бБ]ульвар/u', '', $searchAddress);
-            $searchAddress = preg_replace('/к. \d+/u', '', $searchAddress);
-            $searchAddress = preg_replace('/стр. \d+/u', '', $searchAddress);
+            $searchAddress = preg_replace('/\bм\.\s?[\w\s-]+\b,/u', '', $data['address']);
+            $searchAddress = preg_replace('/\s{0,5}[бБ]ульвар\s?/u', '', $searchAddress);
+            $searchAddress = preg_replace('/к\. \d+/u', '', $searchAddress);
+            $searchAddress = preg_replace('/стр\. \d+/u', '', $searchAddress);
             $searchAddress = str_replace(['д.', 'б-р', 'корп.', 'пер.'], '', $searchAddress);
             $searchAddress = preg_replace('/\s+/u', ' ', $searchAddress);
             $results = $this->getAddressCoords($searchAddress);
