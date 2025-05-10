@@ -107,7 +107,7 @@ class AddressParseService
     private function matchVet(string $string): string|null
     {
         $matches = [];
-        preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯA-Z][а-яa-z]+\b)\s?(?=\()?/u", $string, $matches);
+        preg_match_all("/(?<!\s\w\s)(?<!\.\s)(?<!\()(?<name>[А-ЯЁA-Z][а-яёa-z]+\b)\s?(?=\()?/u", $string, $matches);
         return isset($matches['name']) ? implode(' ', $matches['name']) : null;
     }
 
