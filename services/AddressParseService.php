@@ -181,7 +181,7 @@ class AddressParseService
             $searchAddress = preg_replace('/\s{0,5}[бБ]ульвар\s?/u', '', $searchAddress);
             $searchAddress = preg_replace('/к\. \d+/u', '', $searchAddress);
             $searchAddress = preg_replace('/стр\. \d+/u', '', $searchAddress);
-            $searchAddress = str_replace(['д.', 'б-р', 'корп.', 'пер.'], '', $searchAddress);
+            $searchAddress = str_replace(['д.', 'б-р', 'корп.', 'пер.', 'мкр.'], '', $searchAddress);
             $searchAddress = preg_replace('/\s+/u', ' ', $searchAddress);
             $results = $this->getAddressCoords($searchAddress);
 
