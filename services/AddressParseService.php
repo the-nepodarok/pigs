@@ -177,6 +177,7 @@ class AddressParseService
 
         if (!$clinic) {
             $searchAddress = preg_replace('/\bм\.\s?[\w\s-]+\b,/u', '', $data['address']);
+            $searchAddress = preg_replace('/[шШ]\./u', 'шоссе', $searchAddress);
             $searchAddress = preg_replace('/\s{0,5}[бБ]ульвар\s?/u', '', $searchAddress);
             $searchAddress = preg_replace('/к\. \d+/u', '', $searchAddress);
             $searchAddress = preg_replace('/стр\. \d+/u', '', $searchAddress);
