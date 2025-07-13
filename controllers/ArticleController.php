@@ -95,7 +95,7 @@ class ArticleController extends ApiController
 
                 $article->save();
 
-                if ($article->files) {
+                if (array_filter($article->files)) {
                     $article->setArticleCover();
                 }
 
