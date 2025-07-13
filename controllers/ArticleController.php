@@ -55,7 +55,7 @@ class ArticleController extends ApiController
         if (empty($newArticle->errors) and $newArticle->validate()) {
             $newArticle->save(false);
 
-            if ($newArticle->files) {
+            if (array_filter($newArticle->files)) {
                 $newArticle->setArticleCover();
             }
 
