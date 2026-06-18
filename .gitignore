@@ -8,3 +8,4 @@ themes/classic/views/
 /runtime/
 /db/*.db
 .env
+.idea
