@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\helpers\SlugHelper;
 use yii\db\ActiveQuery;
 
 /**
@@ -16,6 +15,8 @@ use yii\db\ActiveQuery;
  */
 class FoodCategory extends \yii\db\ActiveRecord
 {
+    use HasSlug;
+
     /**
      * {@inheritdoc}
      */
@@ -34,13 +35,12 @@ class FoodCategory extends \yii\db\ActiveRecord
         ];
     }
 
-    public function beforeSave($insert): bool
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
     {
-        if (!$this->slug || $this->isAttributeChanged('value', false)) {
-            $this->slug = SlugHelper::unique(static::tableName(), $this->value, $this->id);
-        }
-
-        return parent::beforeSave($insert);
+        return 'value';
     }
 
     /**

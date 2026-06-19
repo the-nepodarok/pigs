@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\helpers\SlugHelper;
 use app\helpers\StringHelper;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
@@ -25,6 +24,8 @@ use yii\db\StaleObjectException;
  */
 class Article extends EntityWithPhotos
 {
+    use HasSlug;
+
     public string $hashtags;
     /**
      * {@inheritdoc}
@@ -51,13 +52,12 @@ class Article extends EntityWithPhotos
         ]);
     }
 
-    public function beforeSave($insert): bool
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
     {
-        if (!$this->slug || $this->isAttributeChanged('title', false)) {
-            $this->slug = SlugHelper::unique(static::tableName(), $this->title, $this->id);
-        }
-
-        return parent::beforeSave($insert);
+        return 'title';
     }
 
     public function fields(): array

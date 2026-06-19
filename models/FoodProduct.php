@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\helpers\SlugHelper;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -23,6 +22,8 @@ use yii\web\UploadedFile;
  */
 class FoodProduct extends EntityWithPhotos
 {
+    use HasSlug;
+
     const UPLOAD_DIRECTORY = 'img' . DIRECTORY_SEPARATOR . 'info';
     const FILENAME_PREFIX = 'domik-info-';
 
@@ -53,13 +54,12 @@ class FoodProduct extends EntityWithPhotos
         ];
     }
 
-    public function beforeSave($insert): bool
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
     {
-        if (!$this->slug || $this->isAttributeChanged('title', false)) {
-            $this->slug = SlugHelper::unique(static::tableName(), $this->title, $this->id);
-        }
-
-        return parent::beforeSave($insert);
+        return 'title';
     }
 
     /**
