@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use app\helpers\SlugHelper;
 use yii\db\ActiveQuery;
 
 /**
@@ -10,6 +10,7 @@ use yii\db\ActiveQuery;
  *
  * @property int $id
  * @property string|null $value
+ * @property string|null $slug
  *
  * @property FoodProduct[] $foodProducts
  */
@@ -31,6 +32,15 @@ class FoodCategory extends \yii\db\ActiveRecord
         return [
             [['value'], 'string'],
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (!$this->slug || $this->isAttributeChanged('value', false)) {
+            $this->slug = SlugHelper::unique(static::tableName(), $this->value, $this->id);
+        }
+
+        return parent::beforeSave($insert);
     }
 
     /**

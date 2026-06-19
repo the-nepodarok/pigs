@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\SlugHelper;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -12,6 +13,7 @@ use yii\web\UploadedFile;
  *
  * @property int $id
  * @property string $title
+ * @property string|null $slug
  * @property string|null $description
  * @property string|null $image
  * @property array $types
@@ -49,6 +51,15 @@ class FoodProduct extends EntityWithPhotos
             ['is_banned', 'boolean'],
             [['title', 'synonyms', 'is_banned', 'types'], 'safe'],
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (!$this->slug || $this->isAttributeChanged('title', false)) {
+            $this->slug = SlugHelper::unique(static::tableName(), $this->title, $this->id);
+        }
+
+        return parent::beforeSave($insert);
     }
 
     /**

@@ -101,28 +101,33 @@ class FoodProductController extends ApiController
         throw new NotFoundHttpException('Запись с таким ID не найдена');
     }
 
-    public function actionSearch(int $type, string $query)
+    /**
+     * @param string $categorySlug
+     * @param string $query
+     * @return FoodProduct[]|array
+     * @throws Exception
+     */
+    public function actionSearch(string $categorySlug = 'all', string $query = ''): array
     {
         $products = FoodProduct::find()
             ->leftJoin('food_categories_products', 'food_products.id = product_id')
             ->leftJoin('food_categories', 'food_categories.id = food_categories_products.category_id');
 
-        if ($type) {
-            $products = $products->where(['food_categories.id' => $type]);
+        if ($categorySlug !== 'all') {
+            $products = $products->where(['food_categories.slug' => $categorySlug]);
         }
 
         if ($query) {
-
             $query = StringHelper::mb_ucfirst($query);
+            $lowerQuery = mb_strtolower($query);
             $products = $products->andWhere(['OR',
                 ['LIKE', 'title', $query],
                 ['LIKE', 'synonyms', $query],
-                ['LIKE', 'food_categories.value', $query]])->orWhere(
-                    ['OR',
-                        ['LIKE', 'title', mb_strtolower($query)],
-                        ['LIKE', 'synonyms', mb_strtolower($query)],
-                        ['LIKE', 'food_categories.value', mb_strtolower($query)]]
-                );
+                ['LIKE', 'food_categories.value', $query],
+                ['LIKE', 'title', $lowerQuery],
+                ['LIKE', 'synonyms', $lowerQuery],
+                ['LIKE', 'food_categories.value', $lowerQuery],
+            ]);
 
             $foodQuery = FoodQuery::find()->where(['value' => $query])->one();
 

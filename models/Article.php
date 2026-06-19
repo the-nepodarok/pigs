@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\helpers\SlugHelper;
 use app\helpers\StringHelper;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
@@ -15,6 +16,7 @@ use yii\db\StaleObjectException;
  * @property string|null $text
  * @property string|null $main_photo
  * @property string|null $datetime
+ * @property string|null $slug
  * @property int $type_id
  * @property int $cover_id
  *
@@ -47,6 +49,15 @@ class Article extends EntityWithPhotos
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => Type::class, 'targetAttribute' => ['type_id' => 'id']],
             [['cover_id'], 'exist', 'skipOnError' => true, 'targetClass' => Photo::class, 'targetAttribute' => ['cover_id' => 'id']]
         ]);
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (!$this->slug || $this->isAttributeChanged('title', false)) {
+            $this->slug = SlugHelper::unique(static::tableName(), $this->title, $this->id);
+        }
+
+        return parent::beforeSave($insert);
     }
 
     public function fields(): array
