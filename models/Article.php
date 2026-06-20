@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\helpers\StringHelper;
+use app\models\traits\HasSlug;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -15,6 +16,7 @@ use yii\db\StaleObjectException;
  * @property string|null $text
  * @property string|null $main_photo
  * @property string|null $datetime
+ * @property string|null $slug
  * @property int $type_id
  * @property int $cover_id
  *
@@ -23,6 +25,8 @@ use yii\db\StaleObjectException;
  */
 class Article extends EntityWithPhotos
 {
+    use HasSlug;
+
     public string $hashtags;
     /**
      * {@inheritdoc}
@@ -47,6 +51,14 @@ class Article extends EntityWithPhotos
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => Type::class, 'targetAttribute' => ['type_id' => 'id']],
             [['cover_id'], 'exist', 'skipOnError' => true, 'targetClass' => Photo::class, 'targetAttribute' => ['cover_id' => 'id']]
         ]);
+    }
+
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
+    {
+        return 'title';
     }
 
     public function fields(): array

@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use app\models\traits\HasSlug;
 use yii\db\ActiveQuery;
 
 /**
@@ -10,11 +10,14 @@ use yii\db\ActiveQuery;
  *
  * @property int $id
  * @property string|null $value
+ * @property string|null $slug
  *
  * @property FoodProduct[] $foodProducts
  */
-class FoodCategory extends \yii\db\ActiveRecord
+class FoodCategory extends BaseModel
 {
+    use HasSlug;
+
     /**
      * {@inheritdoc}
      */
@@ -31,6 +34,14 @@ class FoodCategory extends \yii\db\ActiveRecord
         return [
             [['value'], 'string'],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
+    {
+        return 'value';
     }
 
     /**

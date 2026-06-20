@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\HasSlug;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -12,6 +13,7 @@ use yii\web\UploadedFile;
  *
  * @property int $id
  * @property string $title
+ * @property string|null $slug
  * @property string|null $description
  * @property string|null $image
  * @property array $types
@@ -21,6 +23,8 @@ use yii\web\UploadedFile;
  */
 class FoodProduct extends EntityWithPhotos
 {
+    use HasSlug;
+
     const UPLOAD_DIRECTORY = 'img' . DIRECTORY_SEPARATOR . 'info';
     const FILENAME_PREFIX = 'domik-info-';
 
@@ -49,6 +53,14 @@ class FoodProduct extends EntityWithPhotos
             ['is_banned', 'boolean'],
             [['title', 'synonyms', 'is_banned', 'types'], 'safe'],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    protected function slugSourceAttribute(): string
+    {
+        return 'title';
     }
 
     /**

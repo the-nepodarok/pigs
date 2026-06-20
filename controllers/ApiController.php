@@ -34,7 +34,7 @@ class ApiController extends \yii\rest\Controller
 
     protected function allowedActions(): array
     {
-        return ['get', 'index', 'randomize', 'search', 'count'];
+        return ['get', 'get-by-slug', 'index', 'randomize', 'search', 'count'];
     }
 
     public function afterAction($action, $result)
@@ -126,6 +126,20 @@ class ApiController extends \yii\rest\Controller
         } else {
             throw new NotFoundHttpException('Объект не найден');
         }
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    public function actionGetBySlug(string $slug): ActiveRecord|array|null
+    {
+        $entry = $this->modelClass::findOne(['slug' => $slug]);
+
+        if ($entry) {
+            return $entry;
+        }
+
+        throw new NotFoundHttpException('Нет результатов');
     }
 
     public function actionCreate(): EntityWithPhotos|FoodProduct|array

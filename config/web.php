@@ -56,7 +56,7 @@ $config = [
                         'GET randomize/<typeId:[1-2]>' => 'randomize',
                         'GET type/<type_id:[1-2]>' => 'index',
                         'GET tag/<tag:\w+>' => 'find-by-tag',
-                        'GET <id>' => 'get',
+                        'GET <slug:[\w-]+>' => 'get-by-slug',
                         'POST type/<type_id:\d+>' => 'create',
                         'PATCH <id>' => 'update',
                         'DELETE <id>' => 'delete'
@@ -150,16 +150,17 @@ $config = [
                     'patterns' => [
                         'GET random' => 'randomize',
                         'GET' => 'index',
-                        'GET <id>' => 'get',
+                        'GET <slug:[\w-]+>' => 'get-by-slug',
                         'POST' => 'create',
                         'PATCH <id>' => 'update',
                         'DELETE <id>' => 'delete',
-                        'GET search/<type:\d+>/<query:[\w+\s+]+>' => 'search',
+                        'GET search/<categorySlug:[\w-]+>/<query:[\w+\s+]+>' => 'search',
+                        'GET search/<categorySlug:[\w-]+>' => 'search',
                     ],
                     'ruleConfig' => [
                         'class' => 'yii\web\UrlRule',
                         'defaults' => [
-                            'type' => 0,
+                            'categorySlug' => 'all',
                             'query' => '',
                         ]
                     ],

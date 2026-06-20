@@ -1,6 +1,6 @@
 <?php
 
-$path = 'C:/OpenServer/domains/pigs/db/pigs.db';
+$path = dirname(__DIR__) . '/db/pigs.db';
 
 return [
     'class' => 'yii\db\Connection',
