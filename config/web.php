@@ -56,6 +56,7 @@ $config = [
                         'GET randomize/<typeId:[1-2]>' => 'randomize',
                         'GET type/<type_id:[1-2]>' => 'index',
                         'GET tag/<tag:\w+>' => 'find-by-tag',
+                        'GET id/<id>' => 'get',
                         'GET <slug:[\w-]+>' => 'get-by-slug',
                         'POST type/<type_id:\d+>' => 'create',
                         'PATCH <id>' => 'update',
