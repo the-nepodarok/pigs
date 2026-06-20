@@ -9,7 +9,7 @@ use yii\web\UploadedFile;
  * @property string|null $main_photo;
  * @property array|null $files;
  */
-class EntityWithPhotos extends ModelWithSlug
+class EntityWithPhotos extends BaseModel
 {
     const UPLOAD_DIRECTORY = 'img';
     const DEFAULT_FILENAME_PREFIX = 'domik-';
