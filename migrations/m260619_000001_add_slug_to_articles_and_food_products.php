@@ -4,7 +4,7 @@ use app\helpers\StringHelper;
 use app\models\Article;
 use app\models\FoodCategory;
 use app\models\FoodProduct;
-use app\models\ModelWithSlug;
+use app\models\BaseModel;
 use yii\db\Migration;
 
 class m260619_000001_add_slug_to_articles_and_food_products extends Migration
@@ -36,7 +36,7 @@ class m260619_000001_add_slug_to_articles_and_food_products extends Migration
     }
 
     /**
-     * @param class-string<ModelWithSlug> $modelClass
+     * @param class-string<BaseModel> $modelClass
      * @param string $sourceColumn
      * @return void
      */
@@ -48,7 +48,7 @@ class m260619_000001_add_slug_to_articles_and_food_products extends Migration
 
         foreach ($models as $model) {
             $sourceValue = $model->getAttribute($sourceColumn);
-            $baseSlug = StringHelper::make_slug($sourceValue);
+            $baseSlug = StringHelper::make_slug((string)$sourceValue);
             $slug = $model->formatUniqueSlug($baseSlug);
 
             $this->update($modelClass::tableName(), ['slug' => $slug], ['id' => $model->id]);

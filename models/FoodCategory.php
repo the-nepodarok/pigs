@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\HasSlug;
 use yii\db\ActiveQuery;
 
 /**
@@ -13,7 +14,7 @@ use yii\db\ActiveQuery;
  *
  * @property FoodProduct[] $foodProducts
  */
-class FoodCategory extends ModelWithSlug
+class FoodCategory extends BaseModel
 {
     use HasSlug;
 

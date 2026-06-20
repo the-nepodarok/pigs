@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace app\models\traits;
 
 use app\helpers\StringHelper;
 
@@ -29,5 +29,25 @@ trait HasSlug
 
             static::updateAll(['slug' => $this->slug], ['id' => $this->id]);
         }
+    }
+
+    /**
+     * Constants in traits are only allowed since PHP 8.2,
+     * so the key for uniqueness is hardcoded
+     *
+     * @param string $baseSlug
+     * @return string
+     */
+    public function formatUniqueSlug(string $baseSlug): string
+    {
+        if ($this->alreadyExists(['slug' => $baseSlug])) {
+            $baseSlug = $baseSlug . '_podrobno';
+
+            if ($this->alreadyExists(['slug' => $baseSlug])) {
+                $baseSlug = $baseSlug . '_' . $this->id;
+            }
+        }
+
+        return $baseSlug;
     }
 }

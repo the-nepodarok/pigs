@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\models\traits\HasSlug;
 use yii\db\ActiveQuery;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
