@@ -5,7 +5,6 @@ namespace app\controllers;
 use app\models\Photo;
 use app\models\Pig;
 use app\models\Status;
-use yii\helpers\ArrayHelper;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\helpers\Json;

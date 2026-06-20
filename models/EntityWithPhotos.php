@@ -152,7 +152,7 @@ class EntityWithPhotos extends BaseModel
     public function handleNewPhotos(): void
     {
         if ($this->files) {
-            foreach ($this->files as $file) {
+            foreach (array_filter($this->files) as $file) {
                 $photo = new Photo();
 
                 try {
