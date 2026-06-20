@@ -1,8 +1,11 @@
 <?php
 
-use app\helpers\SlugHelper;
+use app\helpers\StringHelper;
+use app\models\Article;
+use app\models\FoodCategory;
+use app\models\FoodProduct;
+use app\models\ModelWithSlug;
 use yii\db\Migration;
-use yii\db\Query;
 
 class m260619_000001_add_slug_to_articles_and_food_products extends Migration
 {
@@ -15,9 +18,9 @@ class m260619_000001_add_slug_to_articles_and_food_products extends Migration
         $this->addColumn('food_products', 'slug', $this->string()->null());
         $this->addColumn('food_categories', 'slug', $this->string()->null());
 
-        $this->fillSlugs('articles');
-        $this->fillSlugs('food_products');
-        $this->fillSlugs('food_categories', 'value');
+        $this->fillSlugs(Article::class);
+        $this->fillSlugs(FoodProduct::class);
+        $this->fillSlugs(FoodCategory::class, 'value');
 
         $this->createIndex('idx-articles-slug', 'articles', 'slug', true);
         $this->createIndex('idx-food-products-slug', 'food_products', 'slug', true);
@@ -29,29 +32,26 @@ class m260619_000001_add_slug_to_articles_and_food_products extends Migration
      */
     public function safeDown(): void
     {
-        $this->dropIndex('idx-food-categories-slug', 'food_categories');
-        $this->dropIndex('idx-food-products-slug', 'food_products');
-        $this->dropIndex('idx-articles-slug', 'articles');
-        $this->dropColumn('food_categories', 'slug');
-        $this->dropColumn('food_products', 'slug');
-        $this->dropColumn('articles', 'slug');
+        // no reverting
     }
 
     /**
-     * @param string $tableName
+     * @param class-string<ModelWithSlug> $modelClass
      * @param string $sourceColumn
      * @return void
      */
-    private function fillSlugs(string $tableName, string $sourceColumn = 'title'): void
+    private function fillSlugs(string $modelClass, string $sourceColumn = 'title'): void
     {
-        $rows = (new Query())
+        $models = $modelClass::find()
             ->select(['id', $sourceColumn])
-            ->from($tableName)
             ->all();
 
-        foreach ($rows as $row) {
-            $slug = SlugHelper::unique($tableName, $row[$sourceColumn], $row['id']);
-            $this->update($tableName, ['slug' => $slug], ['id' => $row['id']]);
+        foreach ($models as $model) {
+            $sourceValue = $model->getAttribute($sourceColumn);
+            $baseSlug = StringHelper::make_slug($sourceValue);
+            $slug = $model->formatUniqueSlug($baseSlug);
+
+            $this->update($modelClass::tableName(), ['slug' => $slug], ['id' => $model->id]);
         }
     }
 }

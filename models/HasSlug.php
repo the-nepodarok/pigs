@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\helpers\SlugHelper;
+use app\helpers\StringHelper;
 
 trait HasSlug
 {
@@ -24,7 +24,8 @@ trait HasSlug
 
         if ($insert || array_key_exists($sourceAttribute, $changedAttributes)) {
             $sourceValue = $this->getAttribute($sourceAttribute);
-            $this->slug = SlugHelper::unique(static::tableName(), $sourceValue, $this->id);
+            $slug = StringHelper::make_slug($sourceValue);
+            $this->slug = $this->formatUniqueSlug($slug);
 
             static::updateAll(['slug' => $this->slug], ['id' => $this->id]);
         }

@@ -13,7 +13,7 @@ use yii\db\ActiveQuery;
  *
  * @property FoodProduct[] $foodProducts
  */
-class FoodCategory extends \yii\db\ActiveRecord
+class FoodCategory extends ModelWithSlug
 {
     use HasSlug;
 

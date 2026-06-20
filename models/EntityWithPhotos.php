@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
 
@@ -10,7 +9,7 @@ use yii\web\UploadedFile;
  * @property string|null $main_photo;
  * @property array|null $files;
  */
-class EntityWithPhotos extends ActiveRecord
+class EntityWithPhotos extends ModelWithSlug
 {
     const UPLOAD_DIRECTORY = 'img';
     const DEFAULT_FILENAME_PREFIX = 'domik-';
